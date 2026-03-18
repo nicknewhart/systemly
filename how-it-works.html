@@ -181,12 +181,22 @@
     }
     .footer-text { font-size: 0.82rem; color: var(--ink-faint); }
 
-    @media (max-width: 640px) {
-      .step-block { grid-template-columns: 1fr; }
-      .step-left { flex-direction: row; }
+    @media (max-width: 768px) {
+      nav { padding: 0 16px; height: 56px; }
+      .nav-back { display: none; }
+      .nav-cta { font-size: 0.8rem; padding: 7px 14px; white-space: nowrap; }
+
+      .page-hero { padding: 80px 20px 50px; }
+      .steps-section { padding: 50px 20px; }
+
+      .step-block { grid-template-columns: 1fr; gap: 20px; }
+      .step-left { flex-direction: row; align-items: center; gap: 16px; }
       .step-line { display: none; }
-      nav { padding: 0 20px; }
-      .steps-section { padding: 60px 20px; }
+      .step-number { width: 44px; height: 44px; flex-shrink: 0; }
+
+      .how-cta { padding: 60px 20px; }
+      .how-cta-title { font-size: 1.8rem; }
+      footer { padding: 24px 20px; flex-direction: column; gap: 12px; }
     }
   </style>
 </head>

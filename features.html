@@ -125,9 +125,23 @@
     @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
 
     @media (max-width: 768px) {
-      .feature-section { grid-template-columns: 1fr; gap: 40px; }
+      nav { padding: 0 16px; height: 56px; }
+      .nav-back { display: none; }
+      .nav-cta { font-size: 0.8rem; padding: 7px 14px; white-space: nowrap; }
+
+      .page-hero { padding: 80px 20px 50px; }
+
+      .feature-section {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 50px 20px;
+      }
       .feature-section.reverse { direction: ltr; }
-      nav { padding: 0 20px; }
+
+      .feat-title { font-size: 1.4rem; }
+      .feat-cta { padding: 60px 20px; }
+      .feat-cta-title { font-size: 1.8rem; }
+      footer { padding: 24px 20px; flex-direction: column; gap: 12px; }
     }
   </style>
 </head>
