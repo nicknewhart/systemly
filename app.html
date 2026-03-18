@@ -1,0 +1,3548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Systemly — Design System Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --plum:        #2D6EF5;
+      --plum-light:  #5B8FF9;
+      --plum-deep:   #1a4ed4;
+      --plum-pale:   rgba(230,238,255,0.8);
+      --ink:         #111827;
+      --ink-soft:    #374151;
+      --ink-faint:   #9CA3AF;
+      --glass:       rgba(255,255,255,0.62);
+      --glass-strong:rgba(255,255,255,0.82);
+      --glass-border:rgba(255,255,255,0.82);
+      --glass-shadow:0 8px 32px rgba(45,110,245,0.13), 0 1.5px 4px rgba(45,110,245,0.07);
+    }
+
+    html, body { height: 100%; font-size: 15px; overflow: hidden; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* ── Ambient background ── */
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: linear-gradient(135deg, #dde8ff 0%, #eaf1ff 35%, #d4e3ff 65%, #e8f0ff 100%);
+    }
+
+    .bg::before {
+      content: '';
+      position: absolute;
+      width: 700px; height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,56,255,0.35) 0%, transparent 70%);
+      top: -200px; left: -180px;
+    }
+
+    .bg::after {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,180,255,0.32) 0%, transparent 70%);
+      bottom: -150px; right: -100px;
+    }
+
+    .bg-blob {
+      position: absolute;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(45,110,245,0.25) 0%, transparent 70%);
+      top: 40%; left: 55%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* ── Shell above bg ── */
+    .shell {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      height: 56px;
+      background: var(--glass-strong);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+      flex-shrink: 0;
+      animation: fadeDown 0.4s ease both;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-right: 4px;
+    }
+
+    .logo-mark {
+      width: 30px; height: 30px;
+      background: var(--plum);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(123,79,140,0.35);
+    }
+
+    .logo-text {
+      font-family: 'Lora', serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .topbar-steps {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .tstep {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.74rem; font-weight: 500;
+      color: var(--ink-faint);
+    }
+
+    .tstep.active { color: var(--ink); }
+    .tstep.done   { color: var(--plum); }
+
+    .tstep-num {
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      border: 1px solid rgba(221,208,224,0.8);
+      background: rgba(255,255,255,0.5);
+      display: grid; place-items: center;
+      font-size: 0.62rem; font-weight: 600;
+      backdrop-filter: blur(8px);
+    }
+
+    .tstep.active .tstep-num {
+      background: var(--plum);
+      border-color: var(--plum);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(123,79,140,0.4);
+    }
+
+    .tstep.done .tstep-num {
+      background: rgba(240,232,245,0.9);
+      border-color: var(--plum-light);
+      color: var(--plum);
+    }
+
+    .tstep-line { width: 28px; height: 1px; background: rgba(221,208,224,0.6); margin: 0 2px; }
+
+    .topbar-cta {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--plum);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem; font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      box-shadow: 0 4px 14px rgba(123,79,140,0.4);
+      letter-spacing: 0.01em;
+    }
+
+    .topbar-cta:hover { background: var(--plum-deep); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(123,79,140,0.45); }
+
+    /* ── Main layout ── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      min-height: 0;
+      padding: 16px;
+      gap: 0;
+      align-items: stretch;
+    }
+
+    .panel-left-wrap {
+      width: 400px;
+      min-width: 260px;
+      max-width: 65%;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: visible;
+    }
+
+    .panel-right-wrap {
+      flex: 1;
+      min-width: 280px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .resizer {
+      width: 12px;
+      flex-shrink: 0;
+      cursor: col-resize;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 5;
+    }
+
+    .resizer-bar {
+      width: 4px;
+      height: 40px;
+      border-radius: 99px;
+      background: rgba(200,210,240,0.5);
+      border: 1px solid rgba(255,255,255,0.7);
+      transition: background 0.15s, height 0.15s;
+    }
+
+    .resizer:hover .resizer-bar,
+    .resizer.dragging .resizer-bar {
+      background: rgba(45,110,245,0.5);
+      height: 60px;
+    }
+
+    /* ── Glass card base ── */
+    .glass-card {
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      box-shadow: var(--glass-shadow);
+    }
+
+    .glass-card.right {
+      overflow: hidden;
+    }
+
+    /* ── Left panel ── */
+    .left {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      animation: fadeUp 0.4s 0.05s ease both;
+      opacity: 0;
+    }
+
+    .left-inner {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: visible;
+      padding: 22px 22px 40px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(221,208,224,0.6) transparent;
+    }
+
+    .left-inner::-webkit-scrollbar { width: 4px; }
+    .left-inner::-webkit-scrollbar-thumb { background: rgba(221,208,224,0.7); border-radius: 99px; }
+
+    .panel-title {
+      font-family: 'Lora', serif;
+      font-size: 1.05rem; font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 3px;
+    }
+
+    .panel-sub {
+      font-size: 0.76rem;
+      color: var(--ink-faint);
+      margin-bottom: 20px;
+    }
+
+    /* ── Tabs ── */
+    .tab-row {
+      display: flex;
+      background: rgba(255,255,255,0.4);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 3px;
+      margin-bottom: 18px;
+      backdrop-filter: blur(8px);
+      position: relative;
+      z-index: 60;
+    }
+
+    .tab {
+      flex: 1; padding: 7px 10px;
+      border: none; background: transparent;
+      border-radius: 9px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.74rem; font-weight: 500;
+      color: var(--ink-faint);
+      cursor: pointer; transition: all 0.15s;
+    }
+
+    .tab.active {
+      background: rgba(255,255,255,0.85);
+      color: var(--ink);
+      box-shadow: 0 2px 8px rgba(123,79,140,0.1);
+    }
+
+    /* ── Fields ── */
+    .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 11px; }
+
+    .field label {
+      font-size: 0.7rem; font-weight: 600;
+      color: var(--ink-soft);
+      letter-spacing: 0.02em;
+    }
+
+    .field input,
+    .field select {
+      background: rgba(255,255,255,0.55);
+      border: 1px solid rgba(255,255,255,0.75);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.84rem; color: var(--ink);
+      outline: none;
+      transition: all 0.15s;
+      width: 100%;
+      appearance: none;
+      backdrop-filter: blur(8px);
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: rgba(123,79,140,0.5);
+      background: rgba(255,255,255,0.82);
+      box-shadow: 0 0 0 3px rgba(123,79,140,0.12);
+    }
+
+    .field input::placeholder { color: var(--ink-faint); font-size: 0.8rem; }
+
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    /* ── Section head ── */
+    .sh {
+      display: flex; align-items: center; gap: 10px;
+      margin: 18px 0 12px;
+    }
+
+    .sh span {
+      font-size: 0.64rem; font-weight: 600;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      color: var(--ink-faint); white-space: nowrap;
+    }
+
+    .sh::after { content: ''; flex: 1; height: 1px; background: rgba(221,208,224,0.5); }
+
+    /* ── Color swatches ── */
+    .swatch-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-start; }
+
+    .swatch-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+
+    .swatch {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      border: 2px solid rgba(255,255,255,0.8);
+      cursor: pointer; position: relative;
+      transition: transform 0.12s;
+      box-shadow: 0 2px 8px rgba(42,26,48,0.15);
+    }
+
+    .swatch:hover { transform: scale(1.1) translateY(-2px); }
+    .swatch input[type="color"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .swatch-label { font-size: 0.6rem; color: var(--ink-faint); font-weight: 500; }
+
+    .add-swatch {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      border: 1.5px dashed rgba(168,143,181,0.5);
+      background: rgba(255,255,255,0.3);
+      color: var(--ink-faint); font-size: 1rem;
+      cursor: pointer;
+      display: grid; place-items: center;
+      transition: all 0.12s;
+      backdrop-filter: blur(4px);
+    }
+
+    .add-swatch:hover { border-color: var(--plum); color: var(--plum); background: rgba(240,232,245,0.5); }
+
+    /* ── Font cards ── */
+    .font-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+
+    .font-card {
+      background: rgba(255,255,255,0.45);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      backdrop-filter: blur(8px);
+    }
+
+    .font-card:hover, .font-card.selected {
+      background: rgba(255,255,255,0.75);
+      border-color: rgba(123,79,140,0.4);
+      box-shadow: 0 4px 16px rgba(123,79,140,0.12);
+    }
+
+    .fc-tag { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); margin-bottom: 3px; }
+    .fc-name { font-size: 0.7rem; font-weight: 600; color: var(--plum); margin-bottom: 4px; }
+    .fc-sample { font-size: 1.1rem; color: var(--ink); line-height: 1.2; }
+
+    /* ── Radius ── */
+    .radius-row { display: flex; align-items: center; gap: 12px; }
+
+    .radius-slider {
+      flex: 1; appearance: none;
+      height: 3px; border-radius: 99px;
+      background: rgba(221,208,224,0.6);
+      outline: none; cursor: pointer;
+    }
+
+    .radius-slider::-webkit-slider-thumb {
+      appearance: none; width: 16px; height: 16px;
+      border-radius: 5px;
+      background: var(--plum);
+      border: 2px solid rgba(255,255,255,0.9);
+      box-shadow: 0 2px 6px rgba(123,79,140,0.4);
+      cursor: pointer;
+    }
+
+    .radius-preview {
+      width: 28px; height: 28px;
+      background: rgba(240,232,245,0.8);
+      border: 1.5px solid rgba(166,123,189,0.4);
+      transition: border-radius 0.2s;
+      flex-shrink: 0;
+    }
+
+    .radius-val { font-size: 0.72rem; color: var(--ink-soft); min-width: 28px; text-align: right; font-weight: 500; }
+
+    /* ── Output toggles ── */
+    .output-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+
+    .output-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 11px;
+      background: rgba(255,255,255,0.4);
+      border: 1px solid rgba(255,255,255,0.65);
+      border-radius: 10px;
+      cursor: pointer; transition: all 0.15s;
+      user-select: none;
+      backdrop-filter: blur(6px);
+    }
+
+    .output-item:hover { background: rgba(255,255,255,0.65); }
+
+    .output-item.on {
+      background: rgba(240,232,245,0.7);
+      border-color: rgba(123,79,140,0.35);
+      box-shadow: 0 2px 10px rgba(123,79,140,0.1);
+    }
+
+    .output-icon { font-size: 0.85rem; flex-shrink: 0; }
+    .output-name { font-size: 0.75rem; font-weight: 500; color: var(--ink); line-height: 1.2; }
+    .output-ext  { font-size: 0.62rem; color: var(--ink-faint); }
+
+    .output-check {
+      width: 14px; height: 14px; border-radius: 3px;
+      border: 1px solid rgba(221,208,224,0.8);
+      margin-left: auto; display: grid; place-items: center;
+      flex-shrink: 0; transition: all 0.12s;
+    }
+
+    .output-item.on .output-check { background: var(--plum); border-color: var(--plum); }
+    .output-check::after { content: ''; width: 6px; height: 4px; border-left: 1.5px solid #fff; border-bottom: 1.5px solid #fff; transform: rotate(-45deg) translateY(-1px); opacity: 0; transition: opacity 0.12s; }
+    .output-item.on .output-check::after { opacity: 1; }
+
+    /* ── URL / Upload ── */
+    .url-hint { font-size: 0.74rem; color: var(--ink-faint); margin-bottom: 12px; line-height: 1.6; }
+
+    .btn-scan {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(240,232,245,0.7);
+      color: var(--plum);
+      border: 1px solid rgba(166,123,189,0.4);
+      border-radius: 10px; padding: 8px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.79rem; font-weight: 500;
+      cursor: pointer; transition: all 0.15s; margin-bottom: 12px;
+      backdrop-filter: blur(8px);
+    }
+
+    .btn-scan:hover { background: var(--plum); color: #fff; box-shadow: 0 4px 14px rgba(123,79,140,0.35); }
+
+    .scan-result {
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(255,255,255,0.75);
+      border-radius: 12px; overflow: hidden;
+      animation: fadeUp 0.2s ease both;
+      backdrop-filter: blur(12px);
+    }
+
+    .scan-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 7px 12px; border-bottom: 1px solid rgba(221,208,224,0.4);
+      font-size: 0.75rem;
+    }
+
+    .scan-row:last-child { border-bottom: none; }
+    .scan-key { font-size: 0.67rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-faint); }
+
+    .upload-zone {
+      border: 1.5px dashed rgba(168,143,181,0.45);
+      border-radius: 14px; padding: 28px 20px;
+      text-align: center; cursor: pointer;
+      transition: all 0.15s;
+      background: rgba(255,255,255,0.3);
+      backdrop-filter: blur(6px);
+    }
+
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--plum);
+      background: rgba(240,232,245,0.55);
+      box-shadow: 0 4px 20px rgba(123,79,140,0.12);
+    }
+
+    .upload-title { font-size: 0.88rem; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+    .upload-sub   { font-size: 0.7rem; color: var(--ink-faint); }
+    .upload-file  { margin-top: 8px; font-size: 0.7rem; font-weight: 500; color: var(--plum); background: rgba(240,232,245,0.8); padding: 3px 10px; border-radius: 99px; display: inline-block; border: 1px solid rgba(166,123,189,0.35); }
+
+    /* ── Right panel ── */
+    .right {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      animation: fadeUp 0.4s 0.1s ease both;
+      opacity: 0;
+    }
+
+    .preview-header {
+      padding: 10px 16px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.55);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-shrink: 0;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .preview-header-top {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      gap: 0;
+    }
+
+    .preview-title {
+      font-size: 0.8rem; font-weight: 600; color: var(--ink);
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .preview-live {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 0.67rem; font-weight: 600; color: #4E9E76;
+      background: rgba(78,158,118,0.12);
+      padding: 3px 8px; border-radius: 99px;
+      border: 1px solid rgba(78,158,118,0.25);
+    }
+
+    .preview-live::before {
+      content: ''; width: 5px; height: 5px; border-radius: 50%;
+      background: #4E9E76; animation: pulse 2s ease infinite;
+    }
+
+    .preview-tabs {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      min-width: 0;
+      max-width: calc(100% - 140px);
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding-bottom: 1px;
+    }
+
+    .preview-tabs::-webkit-scrollbar { display: none; }
+
+    .ptab {
+      padding: 5px 12px; border: none;
+      background: rgba(255,255,255,0.35);
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem; font-weight: 500;
+      color: var(--ink-faint); cursor: pointer; transition: all 0.12s;
+      border: 1px solid transparent;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .ptab.active {
+      background: rgba(255,255,255,0.75);
+      color: var(--plum);
+      border-color: rgba(166,123,189,0.3);
+      box-shadow: 0 2px 8px rgba(123,79,140,0.1);
+    }
+
+    .ptab:hover:not(.active) { background: rgba(255,255,255,0.5); color: var(--ink); }
+
+    /* ── Preview canvas ── */
+    .preview-canvas {
+      flex: 1;
+      min-height: 0;
+      padding: 20px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(221,208,224,0.6) transparent;
+      transition: background 0.3s ease;
+    }
+
+    .preview-canvas.active {
+      display: flex;
+    }
+
+    /* ── Dark preview theme ── */
+    .preview-dark {
+      background: #0d1117 !important;
+    }
+
+    .preview-dark .preview-brand-name { color: #e6edf3 !important; }
+    .preview-dark .comp-label { color: #8b949e !important; }
+    .preview-dark .comp-label::after { background: #30363d !important; }
+    .preview-dark .comp-wrap {
+      background: rgba(22,27,34,0.9) !important;
+      border-color: #30363d !important;
+    }
+    .preview-dark .b-ghost {
+      background: rgba(255,255,255,0.06) !important;
+      color: #c9d1d9 !important;
+      border-color: #30363d !important;
+    }
+    .preview-dark .b-input {
+      background: #161b22 !important;
+      border-color: #30363d !important;
+      color: #8b949e !important;
+    }
+    .preview-dark .preview-card {
+      background: rgba(22,27,34,0.95) !important;
+      border-color: #30363d !important;
+    }
+    .preview-dark .preview-card-title { color: #e6edf3 !important; }
+    .preview-dark .preview-card-body  { color: #8b949e !important; }
+    .preview-dark .type-row  { border-color: #21262d !important; }
+    .preview-dark .type-tag  { color: #8b949e !important; }
+    .preview-dark .token-chip {
+      background: rgba(22,27,34,0.9) !important;
+      border-color: #30363d !important;
+    }
+    .preview-dark .token-name { color: #c9d1d9 !important; }
+    .preview-dark .token-hex  { color: #8b949e !important; }
+
+    .preview-canvas::-webkit-scrollbar { width: 4px; }
+    .preview-canvas::-webkit-scrollbar-thumb { background: rgba(221,208,224,0.7); border-radius: 99px; }
+
+    .preview-brand-name {
+      font-family: 'Lora', serif;
+      font-size: 1.5rem; font-weight: 500;
+      color: var(--ink); letter-spacing: -0.02em;
+      transition: all 0.2s;
+    }
+
+    .preview-brand-name em { font-style: italic; color: var(--plum); }
+
+    /* ── Live components ── */
+    .comp-section { display: flex; flex-direction: column; gap: 8px; }
+
+    .comp-label {
+      font-size: 0.63rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--ink-faint);
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .comp-label::after { content: ''; flex: 1; height: 1px; background: var(--preview-divider, rgba(221,208,224,0.5)); }
+
+    .comp-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    /* Glass component wrappers */
+    .comp-wrap {
+      background: rgba(255,255,255,0.45);
+      border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 14px;
+      padding: 14px 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    /* Buttons */
+    .b-primary {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--plum); color: #fff;
+      border: none; padding: 8px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.81rem; font-weight: 500;
+      cursor: default; transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(123,79,140,0.3);
+    }
+
+    .b-secondary {
+      display: inline-flex; align-items: center;
+      background: rgba(255,255,255,0.6);
+      color: var(--plum);
+      border: 1.5px solid rgba(123,79,140,0.35);
+      padding: 8px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.81rem; font-weight: 500;
+      cursor: default; transition: all 0.2s;
+      backdrop-filter: blur(8px);
+    }
+
+    .b-ghost {
+      display: inline-flex; align-items: center;
+      background: rgba(255,255,255,0.35);
+      color: var(--ink-soft);
+      border: 1px solid rgba(255,255,255,0.7);
+      padding: 8px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.81rem; font-weight: 500;
+      cursor: default; transition: all 0.2s;
+      backdrop-filter: blur(8px);
+    }
+
+    .badge {
+      display: inline-flex; align-items: center;
+      font-size: 0.7rem; font-weight: 500;
+      padding: 3px 10px; border-radius: 99px;
+      transition: all 0.2s;
+    }
+
+    .badge.solid   { background: var(--plum); color: #fff; box-shadow: 0 2px 8px rgba(123,79,140,0.3); }
+    .badge.soft    { background: rgba(240,232,245,0.8); color: var(--plum); border: 1px solid rgba(166,123,189,0.25); }
+    .badge.outline { background: rgba(255,255,255,0.4); border: 1.5px solid rgba(166,123,189,0.4); color: var(--plum); }
+
+    .b-input {
+      background: rgba(255,255,255,0.5);
+      border: 1px solid rgba(255,255,255,0.75);
+      padding: 8px 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.81rem; color: var(--ink-faint);
+      width: 100%; outline: none; transition: all 0.2s;
+      backdrop-filter: blur(8px);
+    }
+
+    .b-input.focused {
+      border-color: rgba(123,79,140,0.45);
+      background: rgba(255,255,255,0.75);
+      box-shadow: 0 0 0 3px rgba(123,79,140,0.1);
+      color: var(--ink-faint);
+    }
+
+    /* Card preview */
+    .preview-card {
+      background: rgba(255,255,255,0.52);
+      border: 1px solid rgba(255,255,255,0.78);
+      padding: 16px; transition: all 0.2s;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 6px 24px rgba(123,79,140,0.1);
+    }
+
+    .preview-card-title {
+      font-family: 'Lora', serif;
+      font-size: 0.95rem; font-weight: 500;
+      color: var(--ink); margin-bottom: 6px; transition: font-family 0.2s;
+    }
+
+    .preview-card-body {
+      font-size: 0.77rem; color: var(--ink-soft);
+      line-height: 1.5; margin-bottom: 12px;
+    }
+
+    .preview-card-footer { display: flex; align-items: center; justify-content: space-between; }
+
+    /* Type scale */
+    .type-row {
+      display: flex; align-items: baseline; gap: 12px;
+      padding: 6px 0; border-bottom: 1px solid rgba(221,208,224,0.35);
+    }
+
+    .type-row:last-child { border-bottom: none; }
+    .type-tag { font-size: 0.62rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--ink-faint); min-width: 52px; }
+
+    /* Color tokens */
+    .token-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .token-chip {
+      display: flex; align-items: center; gap: 7px;
+      background: rgba(255,255,255,0.55);
+      border: 1px solid rgba(255,255,255,0.75);
+      border-radius: 8px; padding: 6px 10px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 2px 8px rgba(123,79,140,0.06);
+    }
+
+    .token-dot { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; transition: background 0.2s; box-shadow: 0 1px 4px rgba(42,26,48,0.18); }
+    .token-name { font-size: 0.65rem; color: var(--ink-soft); font-weight: 600; }
+    .token-hex  { font-size: 0.6rem; color: var(--ink-faint); font-family: monospace; }
+
+    /* ── Animations ── */
+    .personality-chip, .type-chip {
+      background: rgba(255,255,255,0.45);
+      border: 1.5px solid rgba(255,255,255,0.7);
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: 0.76rem;
+      font-weight: 500;
+      color: var(--ink-soft);
+      cursor: pointer;
+      transition: all 0.12s;
+      text-align: center;
+      backdrop-filter: blur(6px);
+      user-select: none;
+    }
+
+    .personality-chip:hover, .type-chip:hover {
+      border-color: var(--plum);
+      color: var(--plum);
+      background: rgba(255,255,255,0.7);
+    }
+
+    .personality-chip.selected, .type-chip.selected {
+      background: var(--plum-pale);
+      border-color: var(--plum);
+      color: var(--plum);
+    }
+
+    .palette-chip {
+      border-radius: 8px;
+      padding: 14px 6px 8px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      text-align: center;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      border: 2px solid transparent;
+      transition: all 0.12s;
+      user-select: none;
+    }
+
+    .palette-chip:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .palette-chip.selected { border-color: #fff; box-shadow: 0 0 0 2px var(--plum), 0 4px 12px rgba(0,0,0,0.2); }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeUp   { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes pulse    { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+  </style>
+</head>
+<body>
+
+<!-- Ambient background -->
+<div class="bg"><div class="bg-blob"></div></div>
+
+<div id="app-screen" style="display:flex;flex-direction:column;height:100vh;width:100%;">
+<div class="shell" style="display:contents;">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <rect x="1" y="1" width="5" height="5" rx="1" fill="white" opacity="0.9"/>
+          <rect x="8" y="1" width="5" height="5" rx="1" fill="white" opacity="0.5"/>
+          <rect x="1" y="8" width="5" height="5" rx="1" fill="white" opacity="0.5"/>
+          <rect x="8" y="8" width="5" height="5" rx="1" fill="white" opacity="0.9"/>
+        </svg>
+      </div>
+      <span class="logo-text">Systemly</span>
+    </div>
+
+    <div class="topbar-steps">
+      <div class="tstep active" id="step-1"><div class="tstep-num">1</div><span>Brand inputs</span></div>
+      <div class="tstep-line"></div>
+      <div class="tstep" id="step-2"><div class="tstep-num">2</div><span>Review &amp; Export</span></div>
+    </div>
+
+    <button class="topbar-cta" onclick="handleGenerate()">Generate system →</button>
+  </header>
+
+  <!-- Split panels -->
+  <div class="main" id="mainLayout">
+
+    <!-- LEFT: Form -->
+    <div class="panel-left-wrap" id="leftWrap">
+    <div class="glass-card left" style="flex:1;min-height:0;display:flex;flex-direction:column;overflow:visible;">
+      <div class="left-inner">
+        <div class="panel-title">Brand basics</div>
+        <div class="panel-sub">Fill in your brand details — the preview updates live.</div>
+
+        <div class="tab-row">
+          <button class="tab active" onclick="switchTab(this,'manual')">Manual</button>
+          <button class="tab" onclick="switchTab(this,'url')">Paste URL</button>
+          <button class="tab" onclick="switchTab(this,'upload')">Brand builder</button>
+        </div>
+
+        <!-- Manual -->
+        <div id="panel-manual">
+          <div class="row2">
+            <div class="field">
+              <label>Brand name</label>
+              <input type="text" id="brandName" placeholder="e.g. Horizon Health" oninput="updatePreview()" />
+            </div>
+            <div class="field">
+              <label>Industry</label>
+              <select id="industry" onchange="updatePreview()">
+                <option value="" disabled selected>Select…</option>
+                <option>Technology</option><option>Healthcare</option>
+                <option>Finance</option><option>Retail & E-commerce</option>
+                <option>Education</option><option>Real Estate</option>
+                <option>Hospitality</option><option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Brand personality <span style="color:var(--ink-faint);font-weight:400;">— optional</span></label>
+            <input type="text" placeholder="e.g. Trustworthy, modern, approachable…" />
+          </div>
+        </div>
+
+        <!-- URL -->
+        <div id="panel-url" style="display:none;">
+          <div class="field">
+            <label>Website URL</label>
+            <input type="url" id="urlInput" placeholder="https://your-clients-website.com" />
+          </div>
+          <p class="url-hint">We'll scan the site and pull colors, fonts, and brand signals automatically.</p>
+          <button class="btn-scan" onclick="simulateScan()"><span id="scanLabel">Scan website</span> →</button>
+          <div id="scanResult" style="display:none;" class="scan-result">
+            <div class="scan-row"><span class="scan-key">Colors found</span><div id="scan-color-swatches" style="display:flex;gap:4px;"></div></div>
+            <div class="scan-row"><span class="scan-key">Fonts detected</span><span id="scan-fonts" style="font-size:0.75rem;color:var(--ink-soft);">Scanning…</span></div>
+            <div class="scan-row"><span class="scan-key">Brand name</span><span id="scan-brand-name" style="font-size:0.75rem;color:var(--ink-soft);">Scanning…</span></div>
+            <div style="padding:10px 14px 12px;">
+              <button id="apply-scan-btn" onclick="applyScanResults(); return false;" style="width:100%;background:var(--plum);color:#fff;border:none;border-radius:8px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.15s;box-shadow:0 3px 10px rgba(45,110,245,0.3);">
+                Apply these styles →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upload -->
+        <div id="panel-upload" style="display:none;">
+
+          <!-- Guided brand questionnaire -->
+          <div style="font-size:0.72rem;color:var(--ink-faint);margin-bottom:14px;line-height:1.6;background:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.7);border-radius:10px;padding:10px 12px;">
+            Answer a few quick questions and we'll build your system from scratch.
+          </div>
+
+          <!-- Q1: Brand name -->
+          <div class="field">
+            <label>What's the brand name? <span style="color:var(--ink-faint);font-weight:400;">*</span></label>
+            <input id="q-brand-name" type="text" placeholder="e.g. Horizon Health" oninput="updateQPreview()" />
+          </div>
+
+          <!-- Q2: Industry -->
+          <div class="field">
+            <label>What industry?</label>
+            <select id="q-industry" onchange="updateQPreview()">
+              <option value="" disabled selected>Select…</option>
+              <option>Technology</option><option>Healthcare</option>
+              <option>Finance</option><option>Retail & E-commerce</option>
+              <option>Education</option><option>Real Estate</option>
+              <option>Hospitality</option><option>Other</option>
+            </select>
+          </div>
+
+          <!-- Q3: Personality preset -->
+          <div class="field">
+            <label>How should the brand feel? <span style="color:var(--ink-faint);font-weight:400;">— updates live</span></label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:2px;" id="personality-grid">
+              <div class="personality-chip" onclick="applyPersonalityPreset(this,'professional')" data-val="Professional">🏢 Professional</div>
+              <div class="personality-chip" onclick="applyPersonalityPreset(this,'playful')" data-val="Playful">🎨 Playful</div>
+              <div class="personality-chip" onclick="applyPersonalityPreset(this,'bold')" data-val="Bold">⚡ Bold</div>
+              <div class="personality-chip" onclick="applyPersonalityPreset(this,'minimal')" data-val="Minimal">◻ Minimal</div>
+              <div class="personality-chip" onclick="applyPersonalityPreset(this,'warm')" data-val="Warm">☀️ Warm</div>
+              <div class="personality-chip" onclick="applyPersonalityPreset(this,'trustworthy')" data-val="Trustworthy">🛡 Trustworthy</div>
+              <div class="personality-chip" onclick="applyPersonalityPreset(this,'innovative')" data-val="Innovative">🚀 Innovative</div>
+              <div class="personality-chip" onclick="applyPersonalityPreset(this,'luxurious')" data-val="Luxurious">✦ Luxurious</div>
+            </div>
+          </div>
+
+          <!-- Hint -->
+          <div style="font-size:0.68rem;color:var(--ink-faint);margin-top:2px;">Tap any style — the preview updates instantly.</div>
+
+        </div>
+
+        <!-- Colors -->
+        <div class="sh"><span>Colors</span></div>
+        <div class="swatch-row" id="swatchRow">
+          <div class="swatch-wrap">
+            <div class="swatch" id="sw0" style="background:#111827;">
+              <input type="color" value="#111827" oninput="updateColor(this,'sw0','primary')" />
+            </div>
+            <span class="swatch-label">Primary</span>
+          </div>
+          <div class="swatch-wrap">
+            <div class="swatch" id="sw1" style="background:#2D6EF5;">
+              <input type="color" value="#2D6EF5" oninput="updateColor(this,'sw1','accent')" />
+            </div>
+            <span class="swatch-label">Accent</span>
+          </div>
+          <div class="swatch-wrap">
+            <div class="swatch" id="sw2" style="background:#F0F2F8;border-color:rgba(200,210,240,0.6);">
+              <input type="color" value="#F0F2F8" oninput="updateColor(this,'sw2','surface')" />
+            </div>
+            <span class="swatch-label">Surface</span>
+          </div>
+          <div class="swatch-wrap">
+            <button class="add-swatch" onclick="addSwatch()">+</button>
+            <span class="swatch-label" style="visibility:hidden;">·</span>
+          </div>
+        </div>
+
+        <!-- Typography -->
+        <div class="sh"><span>Typography</span></div>
+
+        <!-- Display font row -->
+        <div style="margin-bottom:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <label style="font-size:0.7rem;font-weight:600;color:var(--ink-soft);">Display font</label>
+            <span style="font-size:0.65rem;color:var(--ink-faint);">Type to search · or upload ↑</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <div style="position:relative;flex:1;">
+              <div style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:0.8rem;color:var(--ink-faint);">🔍</div>
+              <input type="text" id="displayFontInput" placeholder="e.g. Playfair Display, Syne…"
+                onfocus="this.select(); searchGoogleFont(this.value,'display')"
+                oninput="searchGoogleFont(this.value,'display')"
+                style="background:rgba(255,255,255,0.55);border:1px solid rgba(255,255,255,0.75);border-radius:10px;padding:8px 12px 8px 30px;font-family:'DM Sans',sans-serif;font-size:0.84rem;color:var(--ink);outline:none;width:100%;transition:border-color .15s;" 
+                onfocus2="this.style.borderColor='var(--plum)';this.style.boxShadow='0 0 0 3px rgba(45,110,245,0.1)'"
+                onblur="setTimeout(()=>{const s=document.getElementById('display-suggestions');if(s)s.style.display='none'},200)" />
+              <div id="display-suggestions" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:rgba(255,255,255,0.97);backdrop-filter:blur(16px);border:1px solid rgba(200,210,240,0.5);border-radius:10px;margin-top:3px;overflow:hidden;box-shadow:0 8px 24px rgba(45,110,245,0.15);max-height:160px;overflow-y:auto;"></div>
+            </div>
+            <label style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;background:rgba(255,255,255,0.5);border:1px dashed rgba(200,210,240,0.8);border-radius:10px;cursor:pointer;flex-shrink:0;font-size:0.75rem;color:var(--ink-faint);transition:all .12s;" title="Upload .ttf .otf .woff file" onmouseover="this.style.borderColor='var(--plum)';this.style.color='var(--plum)'" onmouseout="this.style.borderColor='rgba(200,210,240,0.8)';this.style.color='var(--ink-faint)'">
+              ↑
+              <input type="file" accept=".ttf,.otf,.woff,.woff2" style="display:none;" onchange="uploadFont(this,'display')" />
+            </label>
+          </div>
+        </div>
+
+        <!-- Body font row -->
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <label style="font-size:0.7rem;font-weight:600;color:var(--ink-soft);">Body font</label>
+            <span style="font-size:0.65rem;color:var(--ink-faint);">Type to search · or upload ↑</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <div style="position:relative;flex:1;">
+              <div style="position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:0.8rem;color:var(--ink-faint);">🔍</div>
+              <input type="text" id="bodyFontInput" placeholder="e.g. DM Sans, Inter, Outfit…"
+                onfocus="this.select(); searchGoogleFont(this.value,'body')"
+                oninput="searchGoogleFont(this.value,'body')"
+                style="background:rgba(255,255,255,0.55);border:1px solid rgba(255,255,255,0.75);border-radius:10px;padding:8px 12px 8px 30px;font-family:'DM Sans',sans-serif;font-size:0.84rem;color:var(--ink);outline:none;width:100%;transition:border-color .15s;"
+                onblur="setTimeout(()=>{const s=document.getElementById('body-suggestions');if(s)s.style.display='none'},200)" />
+              <div id="body-suggestions" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:rgba(255,255,255,0.97);backdrop-filter:blur(16px);border:1px solid rgba(200,210,240,0.5);border-radius:10px;margin-top:3px;overflow:hidden;box-shadow:0 8px 24px rgba(45,110,245,0.15);max-height:160px;overflow-y:auto;"></div>
+            </div>
+            <label style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;background:rgba(255,255,255,0.5);border:1px dashed rgba(200,210,240,0.8);border-radius:10px;cursor:pointer;flex-shrink:0;font-size:0.75rem;color:var(--ink-faint);transition:all .12s;" title="Upload .ttf .otf .woff file" onmouseover="this.style.borderColor='var(--plum)';this.style.color='var(--plum)'" onmouseout="this.style.borderColor='rgba(200,210,240,0.8)';this.style.color='var(--ink-faint)'">
+              ↑
+              <input type="file" accept=".ttf,.otf,.woff,.woff2" style="display:none;" onchange="uploadFont(this,'body')" />
+            </label>
+          </div>
+        </div>
+
+        <!-- Font preview cards -->
+        <div class="font-cards">
+          <div class="font-card selected" id="fc-display" onclick="openFontPicker('display')" title="Change display font">
+            <div class="fc-tag">Display</div>
+            <div class="fc-name" id="fc-display-name">Lora</div>
+            <div class="fc-sample" id="fc-display-sample" style="font-family:'Lora',serif;">Aa Bb Cc</div>
+          </div>
+          <div class="font-card" id="fc-body" onclick="openFontPicker('body')" title="Change body font">
+            <div class="fc-tag">Body</div>
+            <div class="fc-name" id="fc-body-name">DM Sans</div>
+            <div class="fc-sample" id="fc-body-sample" style="font-family:'DM Sans',sans-serif;">The quick fox</div>
+          </div>
+        </div>
+
+        <!-- Font Picker Modal -->
+        <div id="font-picker-modal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(17,24,39,0.4);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;" onclick="if(event.target===this)closeFontPicker()">
+          <div style="background:white;border-radius:16px;padding:24px;width:360px;max-height:480px;display:flex;flex-direction:column;gap:12px;box-shadow:0 24px 64px rgba(0,0,0,0.2);">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div id="font-picker-title" style="font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:700;color:#111827;">Choose Display Font</div>
+              <button onclick="closeFontPicker()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:#9CA3AF;line-height:1;">✕</button>
+            </div>
+            <input id="font-picker-search" type="text" placeholder="Search fonts…" oninput="filterFonts(this.value)" style="width:100%;padding:8px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none;"/>
+            <div id="font-picker-list" style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:4px;"></div>
+          </div>
+        </div>
+
+        <!-- Hidden selects kept for compatibility -->
+        <select id="displayFont" onchange="updateFonts()" style="display:none;"><option>Lora</option></select>
+        <select id="bodyFont" onchange="updateFonts()" style="display:none;"></select>
+
+        <!-- Radius -->
+        <div class="sh"><span>Border radius</span></div>
+        <div class="radius-row">
+          <input type="range" class="radius-slider" min="0" max="20" value="8" id="radiusSlider" oninput="updateRadius(this.value)" />
+          <div class="radius-preview" id="radiusPreview" style="border-radius:8px;"></div>
+          <span class="radius-val" id="radiusVal">8px</span>
+        </div>
+
+        <!-- Outputs -->
+        <div class="sh"><span>Export formats</span></div>
+        <div class="output-grid">
+          <div class="output-item on" onclick="this.classList.toggle('on')">
+            <span class="output-icon">◈</span>
+            <div><div class="output-name">Figma Library</div><div class="output-ext">.fig</div></div>
+            <div class="output-check"></div>
+          </div>
+          <div class="output-item on" onclick="this.classList.toggle('on')">
+            <span class="output-icon">{ }</span>
+            <div><div class="output-name">CSS Tokens</div><div class="output-ext">.css</div></div>
+            <div class="output-check"></div>
+          </div>
+          <div class="output-item on" onclick="this.classList.toggle('on')">
+            <span class="output-icon">⚛</span>
+            <div><div class="output-name">React Components</div><div class="output-ext">.zip</div></div>
+            <div class="output-check"></div>
+          </div>
+          <div class="output-item on" onclick="this.classList.toggle('on')">
+            <span class="output-icon">⊟</span>
+            <div><div class="output-name">PDF Style Guide</div><div class="output-ext">.pdf</div></div>
+            <div class="output-check"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    </div><!-- /leftWrap -->
+
+    <!-- Resizer -->
+    <div class="resizer" id="resizer"><div class="resizer-bar"></div></div>
+
+    <!-- RIGHT: Live Preview -->
+    <div class="panel-right-wrap" id="rightWrap">
+    <div class="glass-card right" style="flex:1;min-height:0;display:flex;flex-direction:column;">
+      <div class="preview-header">
+        <div class="preview-header-top">
+          <div class="preview-title">
+            Live preview
+            <span class="preview-live">Live</span>
+          </div>
+          <!-- Dark/Light toggle -->
+          <div id="theme-toggle" onclick="togglePreviewTheme()" title="Toggle dark/light preview"
+            style="display:flex;align-items:center;gap:6px;cursor:pointer;background:rgba(255,255,255,0.4);border:1px solid rgba(200,210,240,0.5);border-radius:99px;padding:4px 10px 4px 8px;margin-left:12px;transition:all .15s;user-select:none;"
+            onmouseover="this.style.background='rgba(255,255,255,0.7)'"
+            onmouseout="this.style.background='rgba(255,255,255,0.4)'">
+            <div id="theme-toggle-icon" style="font-size:11px;">☀️</div>
+            <span id="theme-toggle-label" style="font-size:0.68rem;font-weight:600;color:var(--ink-soft);">Light</span>
+          </div>
+        </div>
+        <div class="preview-tabs" id="previewTabs">
+          <button class="ptab active" onclick="switchPreviewTab(this,'components')">Components</button>
+          <button class="ptab" onclick="switchPreviewTab(this,'typography')">Typography</button>
+          <button class="ptab" onclick="switchPreviewTab(this,'colors')">Colors</button>
+          
+          
+
+        </div>
+      </div>
+
+      <!-- Components -->
+      <div class="preview-canvas active" id="preview-components">
+        <div id="preview-brand-display" class="preview-brand-name">Your brand, <em>beautifully</em> systemed.</div>
+
+        <div class="comp-section">
+          <div class="comp-label">Buttons</div>
+          <div class="comp-wrap">
+            <div class="comp-row">
+              <button class="b-primary" id="btn-primary" style="border-radius:8px;">Primary action</button>
+              <button class="b-secondary" id="btn-secondary" style="border-radius:8px;">Secondary</button>
+              <button class="b-ghost" id="btn-ghost" style="border-radius:8px;">Ghost</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="comp-section">
+          <div class="comp-label">Badges</div>
+          <div class="comp-wrap">
+            <div class="comp-row">
+              <span class="badge solid" id="badge-solid">Active</span>
+              <span class="badge soft"  id="badge-soft">Pending</span>
+              <span class="badge outline" id="badge-outline">Draft</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="comp-section">
+          <div class="comp-label">Input</div>
+          <div class="comp-wrap">
+            <input class="b-input focused" id="preview-input" placeholder="Focused input state…" style="border-radius:8px;" readonly />
+          </div>
+        </div>
+
+        <div class="comp-section">
+          <div class="comp-label">Card</div>
+          <div class="preview-card" id="preview-card" style="border-radius:14px;overflow:hidden;padding:0;">
+            <div id="preview-card-header" style="background:#111827;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
+              <span id="preview-card-header-name" style="font-size:0.72rem;font-weight:600;color:rgba(255,255,255,0.9);letter-spacing:0.03em;text-transform:uppercase;">Brand</span>
+              <div style="display:flex;gap:4px;">
+                <div class="header-dot" style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.3);"></div>
+                <div class="header-dot" style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.5);"></div>
+                <div class="header-dot" style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.8);"></div>
+              </div>
+            </div>
+            <div style="padding:16px;">
+            <div class="preview-card-title" id="preview-card-title">Patient overview</div>
+            <div class="preview-card-body">Next appointment scheduled for Thursday at 2:00 PM. Two pending lab results awaiting review.</div>
+            <div class="preview-card-footer">
+              <span class="badge soft" id="preview-card-badge">2 pending</span>
+              <button class="b-primary" id="preview-card-btn" style="padding:6px 12px;font-size:0.74rem;border-radius:8px;">View details</button>
+            </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typography -->
+      <div class="preview-canvas" id="preview-typography" style="">
+        <div class="comp-wrap" style="gap:0;padding:16px 20px;">
+          <div class="type-row"><span class="type-tag">Display</span><span id="ts-display" style="font-family:'Lora',serif;font-size:2rem;font-weight:500;color:var(--ink);line-height:1.2;">The headline</span></div>
+          <div class="type-row"><span class="type-tag">H1</span><span id="ts-h1" style="font-family:'Lora',serif;font-size:1.5rem;font-weight:500;color:var(--ink);">Page heading</span></div>
+          <div class="type-row"><span class="type-tag">H2</span><span id="ts-h2" style="font-family:'Lora',serif;font-size:1.15rem;font-weight:500;color:var(--ink);">Section heading</span></div>
+          <div class="type-row"><span class="type-tag">Body</span><span id="ts-body" style="font-family:'DM Sans',sans-serif;font-size:0.9rem;color:var(--ink);">The quick brown fox jumps over the lazy dog.</span></div>
+          <div class="type-row"><span class="type-tag">Caption</span><span id="ts-caption" style="font-family:'DM Sans',sans-serif;font-size:0.75rem;color:var(--ink-soft);">Supporting text and metadata</span></div>
+        </div>
+      </div>
+
+      <!-- Colors -->
+      <div class="preview-canvas" id="preview-colors" style="">
+        <div class="comp-label">Color tokens</div>
+        <div class="token-row">
+          <div class="token-chip"><div class="token-dot" id="tok-primary" style="background:#111827;"></div><div><div class="token-name">primary</div><div class="token-hex" id="tok-primary-hex">#111827</div></div></div>
+          <div class="token-chip"><div class="token-dot" id="tok-accent" style="background:#2D6EF5;"></div><div><div class="token-name">accent</div><div class="token-hex" id="tok-accent-hex">#2D6EF5</div></div></div>
+          <div class="token-chip"><div class="token-dot" id="tok-surface" style="background:#F0F2F8;border:1px solid rgba(200,210,240,0.6);"></div><div><div class="token-name">surface</div><div class="token-hex" id="tok-surface-hex">#F0F2F8</div></div></div>
+          <div class="token-chip"><div class="token-dot" style="background:#4E9E76;"></div><div><div class="token-name">success</div><div class="token-hex">#4E9E76</div></div></div>
+          <div class="token-chip"><div class="token-dot" style="background:#D97B2A;"></div><div><div class="token-name">warning</div><div class="token-hex">#D97B2A</div></div></div>
+          <div class="token-chip"><div class="token-dot" style="background:#C94040;"></div><div><div class="token-name">danger</div><div class="token-hex">#C94040</div></div></div>
+        </div>
+      </div>
+
+
+    </div><!-- glass-card right -->
+
+        </div><!-- /rightWrap -->
+
+  </div>
+</div>
+
+<script>
+  const state = { accent: '#2D6EF5', primary: '#111827', surface: '#F0F2F8', radius: 8 };
+
+  function updatePreview() {
+    const name = document.getElementById('brandName')?.value || '';
+    const d = document.getElementById('preview-brand-display');
+    d.innerHTML = name ? `<em>${name}</em> — systemed.` : 'Your brand, <em>beautifully</em> systemed.';
+    document.getElementById('preview-card-title').textContent = name ? `${name} overview` : 'Patient overview';
+    document.getElementById('preview-card-header-name').textContent = name ? name.toUpperCase() : 'BRAND';
+    document.getElementById('social-brand-name').textContent = name || 'Your Brand';
+    const initials = name ? name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase() : 'YB';
+    const slug = name ? name.toLowerCase().replace(/\s+/g,'') : 'yourbrand';
+    // Instagram
+    const igInit = document.getElementById('ig-initials'); if(igInit) igInit.textContent = initials;
+    const igAvatar = document.getElementById('ig-avatar'); if(igAvatar) igAvatar.querySelector('span').textContent = initials;
+    const igName = document.getElementById('ig-name'); if(igName) igName.textContent = slug;
+    const igCName = document.getElementById('ig-caption-name'); if(igCName) igCName.textContent = slug;
+    const igH = document.getElementById('ig-headline'); if(igH) igH.innerHTML = name ? `${name},<br/><em style="color:rgba(255,255,255,0.65);">systemed.</em>` : `Your brand,<br/><em style="color:rgba(255,255,255,0.65);">systemed.</em>`;
+    // LinkedIn
+    const liInit = document.getElementById('li-initials'); if(liInit) liInit.textContent = initials;
+    const liName = document.getElementById('li-name'); if(liName) liName.textContent = name || 'Your Brand';
+    const liH = document.getElementById('li-headline'); if(liH) liH.textContent = name ? `${name}, beautifully systemed.` : 'Your brand, beautifully systemed.';
+    // Facebook
+    const fbInit = document.getElementById('fb-initials'); if(fbInit) fbInit.textContent = initials;
+    const fbName = document.getElementById('fb-name'); if(fbName) fbName.textContent = name || 'Your Brand';
+    const fbH = document.getElementById('fb-headline'); if(fbH) fbH.innerHTML = name ? `${name},<br/><em style="color:rgba(255,255,255,0.6);">beautifully systemed.</em>` : `Your brand,<br/><em style="color:rgba(255,255,255,0.6);">beautifully systemed.</em>`;
+    // Mockups
+    applyAccent();
+  }
+
+  function setEl(id, prop, val) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (prop === 'text') el.textContent = val;
+    else el.style[prop] = val;
+  }
+
+  function updateColor(input, swatchId, role) {
+    const val = input.value;
+    setEl(swatchId, 'background', val);
+    state[role] = val;
+    applyAccent();
+    if (role === 'primary') { setEl('tok-primary','background',val); setEl('tok-primary-hex','text',val); }
+    if (role === 'accent')  { setEl('tok-accent','background',val);  setEl('tok-accent-hex','text',val); }
+    if (role === 'surface') {
+      setEl('tok-surface','background',val);
+      setEl('tok-surface-hex','text',val);
+      document.documentElement.style.setProperty('--cream', val);
+      // Apply surface to all preview canvases
+      document.querySelectorAll('.preview-canvas').forEach(function(el) {
+        el.style.background = val;
+      });
+      // Auto-contrast: adjust text colors based on surface brightness
+      var surfaceContrast = contrastColor(val);
+      var isDark = surfaceContrast === '#ffffff';
+      // Brand display text
+      var brandDisplay = document.getElementById('preview-brand-display');
+      if (brandDisplay) {
+        brandDisplay.style.color = isDark ? 'rgba(255,255,255,0.92)' : '';
+      }
+      // Section labels
+      document.querySelectorAll('.comp-label').forEach(function(el) {
+        el.style.color = isDark ? 'rgba(255,255,255,0.45)' : '';
+        var after = el.querySelector('::after');
+      });
+      // Token names and hex values
+      document.querySelectorAll('.token-name').forEach(function(el) {
+        el.style.color = isDark ? 'rgba(255,255,255,0.7)' : '';
+      });
+      document.querySelectorAll('.token-hex').forEach(function(el) {
+        el.style.color = isDark ? 'rgba(255,255,255,0.45)' : '';
+      });
+      // Type scale samples
+      document.querySelectorAll('.type-scale-row .ts-label').forEach(function(el) {
+        el.style.color = isDark ? 'rgba(255,255,255,0.4)' : '';
+      });
+      // Update the comp-label divider line via CSS variable
+      document.documentElement.style.setProperty('--preview-divider', isDark ? 'rgba(255,255,255,0.12)' : 'rgba(221,208,224,0.5)');
+      document.documentElement.style.setProperty('--preview-label-color', isDark ? 'rgba(255,255,255,0.45)' : '');
+    }
+  }
+
+  // ── Color utilities ───────────────────────────────────────────────────────
+  function shadeColor(hex, percent) {
+    // Darken (negative) or lighten (positive) a hex color
+    try {
+      const h = hex.replace('#','');
+      const r = Math.max(0, Math.min(255, parseInt(h.slice(0,2),16) + percent*2.55));
+      const g = Math.max(0, Math.min(255, parseInt(h.slice(2,4),16) + percent*2.55));
+      const b = Math.max(0, Math.min(255, parseInt(h.slice(4,6),16) + percent*2.55));
+      return '#' + [r,g,b].map(v => Math.round(v).toString(16).padStart(2,'0')).join('');
+    } catch(e) { return hex; }
+  }
+
+  // Returns '#fff' or '#111827' depending on which has better contrast on bg
+  function contrastColor(hex) {
+    const c = hex.replace('#','');
+    const r = parseInt(c.substring(0,2),16) / 255;
+    const g = parseInt(c.substring(2,4),16) / 255;
+    const b = parseInt(c.substring(4,6),16) / 255;
+    // sRGB luminance
+    const toLinear = v => v <= 0.04045 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4);
+    const L = 0.2126*toLinear(r) + 0.7152*toLinear(g) + 0.0722*toLinear(b);
+    // WCAG contrast ratio vs white (L=1) and dark (L=0.05)
+    const vsWhite = (1 + 0.05) / (L + 0.05);
+    const vsDark  = (L + 0.05) / (0.05 + 0.05);
+    return vsWhite >= vsDark ? '#ffffff' : '#111827';
+  }
+
+  // Same but returns a slightly muted version for secondary text
+  function contrastColorMuted(hex) {
+    const base = contrastColor(hex);
+    return base === '#ffffff' ? 'rgba(255,255,255,0.65)' : 'rgba(17,24,39,0.55)';
+  }
+
+  function contrastColorSubtle(hex) {
+    const base = contrastColor(hex);
+    return base === '#ffffff' ? 'rgba(255,255,255,0.9)' : 'rgba(17,24,39,0.85)';
+  }
+
+  function applyAccent() {
+    const a = state.accent;
+    const p = state.primary;
+    const s = state.surface;
+
+    // ── Compute contrast FIRST, use everywhere ───────────────────────────────
+    const aText       = contrastColor(a);
+    const pText       = contrastColor(p);
+    const pTextSubtle = contrastColorSubtle(p);
+
+    // For soft/outline elements: accent color as text only works if accent
+    // has enough contrast against white. If not, fall back to a darkened version.
+    // Simple rule: if accent is too light for white bg, use a darker shade.
+    function accentOnWhite(hex) {
+      // contrast against white bg — need at least 3:1 for UI elements
+      const c = hex.replace('#','');
+      const r = parseInt(c.slice(0,2),16)/255;
+      const g = parseInt(c.slice(2,4),16)/255;
+      const b = parseInt(c.slice(4,6),16)/255;
+      const toL = v => v <= 0.04045 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4);
+      const L = 0.2126*toL(r) + 0.7152*toL(g) + 0.0722*toL(b);
+      const vsWhite = 1.05 / (L + 0.05);
+      // If contrast vs white < 2.5, darken by mixing with black
+      if (vsWhite < 2.5) return shadeColor(hex, -40);
+      return hex;
+    }
+    const aSafe = accentOnWhite(a); // safe accent color for use on white/light backgrounds
+
+    // Components tab
+    setEl('btn-primary', 'background', a);
+    setEl('btn-primary', 'color', aText);
+    setEl('btn-primary', 'boxShadow', `0 4px 12px ${a}55`);
+    setEl('btn-secondary', 'color', aSafe);
+    setEl('btn-secondary', 'borderColor', aSafe + '80');
+    setEl('badge-solid', 'background', a);
+    setEl('badge-solid', 'color', aText);
+    setEl('badge-solid', 'boxShadow', `0 2px 8px ${a}50`);
+    setEl('badge-soft', 'color', aSafe);
+    setEl('badge-soft', 'background', a + '18');
+    setEl('badge-outline', 'color', aSafe);
+    setEl('badge-outline', 'borderColor', aSafe + '80');
+    setEl('preview-input', 'borderColor', aSafe + '90');
+    setEl('preview-input', 'boxShadow', `0 0 0 3px ${a}18`);
+    setEl('preview-card-badge', 'color', aSafe);
+    setEl('preview-card-badge', 'background', a + '18');
+    setEl('preview-card-btn', 'background', a);
+    setEl('preview-card-btn', 'color', aText);
+    setEl('preview-card-btn', 'boxShadow', `0 4px 12px ${a}50`);
+    // Card header uses primary — auto contrast text
+    setEl('preview-card-header', 'background', p);
+    setEl('preview-card-header-name', 'color', pTextSubtle);
+    // Card header dots
+    const dots = document.querySelectorAll('#preview-card-header .header-dot');
+    dots.forEach((d,i) => d.style.background = `rgba(${pText==='#ffffff'?'255,255,255':'17,24,39'},${[0.3,0.5,0.8][i]})`);
+
+    // Social post — header uses primary, auto contrast text
+    const aTextMuted  = contrastColorMuted(a);
+    setEl('social-header', 'background', p);
+    setEl('social-brand-name', 'color', pText);
+    setEl('social-headline', 'color', pText);
+    // Update em inside headline too
+    const em = document.querySelector('#social-headline em');
+    if (em) em.style.color = pText === '#ffffff' ? 'rgba(255,255,255,0.75)' : 'rgba(17,24,39,0.6)';
+    setEl('social-body', 'color', contrastColorMuted(p));
+    // ── Every accent-background element gets auto contrast text ─────────────
+
+    // (component colors already set above with contrast)
+
+    // Social CTA button
+    const sCta = document.getElementById('social-cta');
+    if (sCta) { sCta.style.background = a; sCta.style.color = aText; sCta.style.boxShadow = `0 4px 12px ${a}50`; }
+
+    // Instagram
+    const igAv = document.getElementById('ig-avatar');
+    if (igAv) { igAv.style.background = a; igAv.style.boxShadow = `0 0 0 2px #fff,0 0 0 3.5px ${a}`; igAv.querySelector('span').style.color = aText; }
+    const igLogo = document.getElementById('ig-logo');
+    if (igLogo) { igLogo.style.background = a; igLogo.style.boxShadow = `0 4px 16px ${a}70`; }
+    const igBadge = document.getElementById('ig-badge');
+    if (igBadge) { igBadge.style.background = a; igBadge.style.color = aText; }
+    const igImg = document.getElementById('ig-image');
+    if (igImg) igImg.style.background = p;
+
+    // LinkedIn
+    const liAv = document.getElementById('li-avatar');
+    if (liAv) { liAv.style.background = a; liAv.querySelector('span').style.color = aText; }
+    const liLogo = document.getElementById('li-logo');
+    if (liLogo) { liLogo.style.background = a; }
+    const liImg = document.getElementById('li-image');
+    if (liImg) liImg.style.background = p;
+
+    // Facebook
+    const fbAv = document.getElementById('fb-avatar');
+    if (fbAv) { fbAv.style.background = a; fbAv.querySelector('span').style.color = aText; }
+    const fbLogo = document.getElementById('fb-logo');
+    if (fbLogo) { fbLogo.style.background = a; }
+    const fbBadge = document.getElementById('fb-badge');
+    if (fbBadge) { fbBadge.style.background = a; fbBadge.style.color = aText; }
+    const fbImg = document.getElementById('fb-image');
+    if (fbImg) fbImg.style.background = p;
+
+    // ── Mockups ───────────────────────────────────────────────────────────
+    const pTextM = contrastColor(p);
+    // Hero
+    const hBody = document.getElementById('hero-body'); if(hBody) hBody.style.background = p;
+    const hBlob1 = document.getElementById('hero-blob1'); if(hBlob1) hBlob1.style.background = `${a}22`;
+    const hBlob2 = document.getElementById('hero-blob2'); if(hBlob2) hBlob2.style.background = `${a}18`;
+    const hEye = document.getElementById('hero-eyebrow'); if(hEye){hEye.style.background=`${a}20`;hEye.style.borderColor=`${a}35`;}
+    const hEyeDot = document.getElementById('hero-eyebrow-dot'); if(hEyeDot) hEyeDot.style.background = a;
+    const hEyeTxt = document.getElementById('hero-eyebrow-text'); if(hEyeTxt) hEyeTxt.style.color = pTextM;
+    const hHL = document.getElementById('hero-headline'); if(hHL) hHL.style.color = pTextM;
+    const hHLem = document.getElementById('hero-headline-em'); if(hHLem) hHLem.style.color = pTextM==='#ffffff'?'rgba(255,255,255,0.6)':'rgba(17,24,39,0.5)';
+    const hSub = document.getElementById('hero-subline'); if(hSub) hSub.style.color = pTextM==='#ffffff'?'rgba(255,255,255,0.5)':'rgba(17,24,39,0.45)';
+    const hChip1 = document.getElementById('hero-chip1-dot'); if(hChip1) hChip1.style.background = a;
+    const hNavLogo = document.getElementById('hero-nav-logo'); if(hNavLogo){hNavLogo.style.background=a;}
+    const hNavCta = document.getElementById('hero-nav-cta'); if(hNavCta){hNavCta.style.background=a;hNavCta.style.color=aText;}
+    const hCta = document.getElementById('hero-cta-primary'); if(hCta){hCta.style.background=a;hCta.style.color=aText;}
+    // App
+    const appHdr = document.getElementById('app-header'); if(appHdr) appHdr.style.background = p;
+    const appGreet = document.getElementById('app-greeting'); if(appGreet) appGreet.style.color = pTextM==='#ffffff'?'rgba(255,255,255,0.45)':'rgba(17,24,39,0.4)';
+    const appName = document.getElementById('app-brand-name'); if(appName) appName.style.color = pTextM;
+    const appAv = document.getElementById('app-avatar'); if(appAv){appAv.style.background=a;}
+    const appAvI = document.getElementById('app-avatar-initials'); if(appAvI) appAvI.style.color = aText;
+    const appC1 = document.getElementById('app-card1'); if(appC1){appC1.style.background=a;appC1.style.boxShadow=`0 4px 12px ${a}45`;}
+    const appC1v = document.getElementById('app-card1-val'); if(appC1v) appC1v.style.color = aText;
+    const appI1d = document.getElementById('app-item1-dot'); if(appI1d) appI1d.style.background = a;
+    const appI1b = document.getElementById('app-item1-badge'); if(appI1b){appI1b.style.background=a;appI1b.style.color=aText;}
+    const appNav = document.getElementById('app-nav-active'); if(appNav) appNav.style.background = a;
+    const appNavSpans = document.querySelectorAll('#app-bottom-nav span');
+    if(appNavSpans[0]) appNavSpans[0].style.color = aSafe;
+  }
+
+  function updateRadius(val) {
+    state.radius = parseInt(val);
+    const r = parseInt(val);
+    setEl('radiusPreview', 'borderRadius', val + 'px');
+    setEl('radiusVal', 'text', val + 'px');
+    ['btn-primary','btn-secondary','btn-ghost','preview-input','preview-card-btn','social-cta','social-ghost',
+     'ig-badge','fb-badge'].forEach(id => setEl(id, 'borderRadius', r + 'px'));
+    setEl('preview-card', 'borderRadius', Math.min(r * 1.8, 24) + 'px');
+    setEl('social-post',  'borderRadius', Math.min(r * 2, 20) + 'px');
+    setEl('social-logo-mark', 'borderRadius', r + 'px');
+    setEl('hero-nav-cta',    'borderRadius', r + 'px');
+    setEl('hero-cta-primary','borderRadius', r + 'px');
+    setEl('hero-cta-ghost',  'borderRadius', r + 'px');
+    setEl('app-card1', 'borderRadius', Math.min(r+2,10) + 'px');
+  }
+
+  function updateFonts() {
+    const dfInput = document.getElementById('displayFontInput');
+    const bfInput = document.getElementById('bodyFontInput');
+    const df = (dfInput ? dfInput.value : null) || document.getElementById('displayFont').value || 'Lora';
+    const bf = (bfInput ? bfInput.value : null) || document.getElementById('bodyFont').value || 'DM Sans';
+    // Sync hidden selects
+    document.getElementById('displayFont').value = df;
+    document.getElementById('bodyFont').value = bf;
+    document.getElementById('fc-display-name').textContent = df;
+    document.getElementById('fc-display-sample').style.fontFamily = `'${df}', serif`;
+    document.getElementById('fc-body-name').textContent = bf;
+    document.getElementById('fc-body-sample').style.fontFamily = `'${bf}', sans-serif`;
+    ['ts-display','ts-h1','ts-h2'].forEach(id => document.getElementById(id).style.fontFamily = `'${df}', serif`);
+    ['ts-body','ts-caption'].forEach(id => document.getElementById(id).style.fontFamily = `'${bf}', sans-serif`);
+    document.getElementById('preview-card-title').style.fontFamily = `'${df}', serif`;
+    document.getElementById('preview-brand-display').style.fontFamily = `'${df}', serif`;
+    document.getElementById('social-headline').style.fontFamily = `'${df}', serif`;
+    document.getElementById('social-body').style.fontFamily = `'${bf}', sans-serif`;
+    document.getElementById('social-cta').style.fontFamily = `'${bf}', sans-serif`;
+    const hHL2 = document.getElementById('hero-headline'); if(hHL2) hHL2.style.fontFamily = `'${df}', serif`;
+    const hSub2 = document.getElementById('hero-subline'); if(hSub2) hSub2.style.fontFamily = `'${bf}', sans-serif`;
+    const hCta2 = document.getElementById('hero-cta-primary'); if(hCta2) hCta2.style.fontFamily = `'${bf}', sans-serif`;
+    const hGhost = document.getElementById('hero-cta-ghost'); if(hGhost) hGhost.style.fontFamily = `'${bf}', sans-serif`;
+    const hNav = document.getElementById('hero-nav-name'); if(hNav) hNav.style.fontFamily = `'${bf}', sans-serif`;
+    if (typeof applyPreviewThemeText === 'function') applyPreviewThemeText();
+  }
+
+  // ── Google Font search ───────────────────────────────────────────────────
+  const GOOGLE_FONTS = [
+    'Lora','Playfair Display','Fraunces','DM Serif Display','Libre Baskerville',
+    'Merriweather','Cormorant Garamond','EB Garamond','Crimson Text','Spectral',
+    'Abril Fatface','Alfa Slab One','Bitter','Cardo','Domine',
+    'DM Sans','Outfit','Plus Jakarta Sans','Nunito','Mulish',
+    'Inter','Poppins','Raleway','Rubik','Work Sans','Manrope',
+    'Sora','Figtree','Lexend','Be Vietnam Pro','Noto Sans',
+    'Space Grotesk','Syne','Cabinet Grotesk','Satoshi','Geist',
+    'IBM Plex Sans','IBM Plex Serif','IBM Plex Mono','Geist Mono',
+    'Oswald','Montserrat','Source Sans 3','Source Serif 4','Josefin Sans',
+    'Quicksand','Karla','Barlow','Cabin','Exo 2','Urbanist',
+  ];
+
+  let fontSearchTimers = {};
+
+  function searchGoogleFont(query, type) {
+    const suggestId = type + '-suggestions';
+    const suggestEl = document.getElementById(suggestId);
+    clearTimeout(fontSearchTimers[type]);
+
+    // Show popular fonts when empty/focused, filter when typing
+    const pool = (!query || query.length < 1)
+      ? GOOGLE_FONTS.slice(0, 10)
+      : GOOGLE_FONTS.filter(f => f.toLowerCase().includes(query.toLowerCase())).slice(0, 8);
+
+    const matches = pool;
+    if (!matches.length) { suggestEl.style.display = 'none'; return; }
+
+    suggestEl.innerHTML = matches.map(f => `
+      <div onclick="selectGoogleFont('${f}','${type}')"
+        style="padding:8px 12px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .1s;border-bottom:1px solid rgba(200,210,240,0.15);"
+        onmouseover="this.style.background='rgba(45,110,245,0.06)'"
+        onmouseout="this.style.background='transparent'">
+        <span style="font-size:0.82rem;color:var(--ink);font-weight:500;">${f}</span>
+        <span style="font-size:0.75rem;color:var(--ink-faint);font-family:'${f}',serif,sans-serif;">Aa</span>
+      </div>`).join('');
+    suggestEl.style.display = 'block';
+  }
+
+  function selectGoogleFont(fontName, type) {
+    const inputId = type + 'FontInput';
+    const suggestId = type + '-suggestions';
+    document.getElementById(inputId).value = fontName;
+    document.getElementById(suggestId).style.display = 'none';
+
+    // Load from Google Fonts if not already loaded
+    loadGoogleFont(fontName);
+
+    // Small delay to let font load then update preview
+    setTimeout(() => updateFonts(), 300);
+  }
+
+  function loadGoogleFont(fontName) {
+    const id = 'gfont-' + fontName.replace(/\s+/g,'-');
+    if (document.getElementById(id)) return; // already loaded
+    const link = document.createElement('link');
+    link.id = id;
+    link.rel = 'stylesheet';
+    link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName)}:wght@400;500;600&display=swap`;
+    document.head.appendChild(link);
+  }
+
+  // Set default font values after a short delay so placeholder is visible first
+  // then populate with defaults
+  window.addEventListener('load', () => {
+    const di = document.getElementById('displayFontInput');
+    const bi = document.getElementById('bodyFontInput');
+    if (di && !di.value) { di.value = 'Lora'; }
+    if (bi && !bi.value) { bi.value = 'DM Sans'; }
+    updateFonts();
+  });
+
+  // Close suggestions on outside click or scroll
+  document.addEventListener('click', e => {
+    ['display-suggestions','body-suggestions'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && !el.contains(e.target) && e.target.id !== 'displayFontInput' && e.target.id !== 'bodyFontInput') {
+        el.style.display = 'none';
+      }
+    });
+  });
+
+  // Close on scroll so they don't hang over other elements
+  document.querySelector('.left-inner')?.addEventListener('scroll', () => {
+    ['display-suggestions','body-suggestions'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+  }, { passive: true });
+
+  // ── Font file upload ──────────────────────────────────────────────────────
+  function uploadFont(input, type) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const fontName = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+    const reader = new FileReader();
+    reader.onload = e => {
+      // Register the font via @font-face
+      const style = document.createElement('style');
+      style.textContent = `@font-face { font-family: '${fontName}'; src: url('${e.target.result}'); font-display: swap; }`;
+      document.head.appendChild(style);
+
+      // Set the input value and update preview
+      document.getElementById(type + 'FontInput').value = fontName;
+      setTimeout(() => updateFonts(), 100);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ── Preview theme toggle ──────────────────────────────────────────────────
+  let previewIsDark = false;
+
+  function togglePreviewTheme() {
+    previewIsDark = !previewIsDark;
+    const icon  = document.getElementById('theme-toggle-icon');
+    const label = document.getElementById('theme-toggle-label');
+    const toggle = document.getElementById('theme-toggle');
+
+    if (previewIsDark) {
+      icon.textContent  = '🌙';
+      label.textContent = 'Dark';
+      toggle.style.background   = 'rgba(13,17,23,0.7)';
+      toggle.style.borderColor  = '#30363d';
+      label.style.color = '#c9d1d9';
+      toggle.onmouseover = () => toggle.style.background = 'rgba(13,17,23,0.9)';
+      toggle.onmouseout  = () => toggle.style.background = 'rgba(13,17,23,0.7)';
+    } else {
+      icon.textContent  = '☀️';
+      label.textContent = 'Light';
+      toggle.style.background   = 'rgba(255,255,255,0.4)';
+      toggle.style.borderColor  = 'rgba(200,210,240,0.5)';
+      label.style.color = 'var(--ink-soft)';
+      toggle.onmouseover = () => toggle.style.background = 'rgba(255,255,255,0.7)';
+      toggle.onmouseout  = () => toggle.style.background = 'rgba(255,255,255,0.4)';
+    }
+
+    // Apply to all preview canvases
+    document.querySelectorAll('.preview-canvas').forEach(function(el) {
+      el.classList.toggle('preview-dark', previewIsDark);
+      // Override background based on mode
+      if (previewIsDark) {
+        el.style.background = '#0d1117';
+      } else {
+        // Restore surface color
+        el.style.background = state.surface;
+      }
+    });
+
+    // Update CSS variable for dividers
+    document.documentElement.style.setProperty('--preview-divider', previewIsDark ? 'rgba(255,255,255,0.1)' : 'rgba(221,208,224,0.5)');
+
+    // Update inline-styled text in the active panels
+    applyPreviewThemeText();
+
+    // Re-apply surface contrast text if in light mode
+    if (!previewIsDark) {
+      var surfaceContrast = contrastColor(state.surface);
+      var surfaceIsDark = surfaceContrast === '#ffffff';
+      var bd = document.getElementById('preview-brand-display');
+      if (bd) bd.style.color = surfaceIsDark ? 'rgba(255,255,255,0.92)' : '';
+      document.querySelectorAll('.comp-label').forEach(function(el) {
+        el.style.color = surfaceIsDark ? 'rgba(255,255,255,0.45)' : '';
+      });
+      document.querySelectorAll('.token-name').forEach(function(el) {
+        el.style.color = surfaceIsDark ? 'rgba(255,255,255,0.7)' : '';
+      });
+      document.querySelectorAll('.token-hex').forEach(function(el) {
+        el.style.color = surfaceIsDark ? 'rgba(255,255,255,0.45)' : '';
+      });
+      document.documentElement.style.setProperty('--preview-divider', surfaceIsDark ? 'rgba(255,255,255,0.12)' : 'rgba(221,208,224,0.5)');
+    }
+  }
+
+  function applyPreviewThemeText() {
+    const dark = previewIsDark;
+    const ink  = dark ? '#e6edf3' : 'var(--ink)';
+    const soft = dark ? '#8b949e' : 'var(--ink-soft)';
+
+    // Typography panel text
+    ['ts-display','ts-h1','ts-h2','ts-body'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.color = ink;
+    });
+    const cap = document.getElementById('ts-caption');
+    if (cap) cap.style.color = soft;
+
+    // Brand display
+    const bd = document.getElementById('preview-brand-display');
+    if (bd) bd.style.color = ink;
+
+    // Card title and body
+    const ct = document.getElementById('preview-card-title');
+    if (ct) ct.style.color = ink;
+    const cb = document.querySelector('.preview-card-body');
+    if (cb) cb.style.color = soft;
+
+    // Card header bg — keep primary color but ensure contrast
+    const ch = document.getElementById('preview-card-header');
+    if (ch) ch.style.background = state.primary;
+
+    // Ghost button text
+    const ghost = document.getElementById('btn-ghost');
+    if (ghost) {
+      ghost.style.color       = dark ? '#c9d1d9' : 'var(--ink-soft)';
+      ghost.style.background  = dark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.35)';
+      ghost.style.borderColor = dark ? '#30363d' : 'rgba(255,255,255,0.7)';
+    }
+
+    // Input
+    const inp = document.getElementById('preview-input');
+    if (inp) {
+      inp.style.background = dark ? '#161b22' : 'rgba(255,255,255,0.5)';
+      inp.style.color      = dark ? '#8b949e' : 'var(--ink-faint)';
+    }
+
+    // Right panel background
+    const rightCard = document.querySelector('.glass-card.right');
+    if (rightCard) {
+      rightCard.style.background = dark
+        ? 'rgba(13,17,23,0.85)'
+        : 'var(--glass)';
+      rightCard.style.borderColor = dark
+        ? '#30363d'
+        : 'var(--glass-border)';
+    }
+
+    // Preview header
+    const ph = document.querySelector('.preview-header');
+    if (ph) {
+      ph.style.borderBottomColor = dark ? '#21262d' : 'rgba(255,255,255,0.55)';
+      ph.style.background = dark ? 'rgba(22,27,34,0.6)' : '';
+    }
+
+    // Tab styling
+    document.querySelectorAll('.ptab').forEach(t => {
+      if (!t.classList.contains('active')) {
+        t.style.color = dark ? '#8b949e' : 'var(--ink-faint)';
+        t.style.background = dark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.35)';
+      }
+    });
+
+    // Live badge
+    const liveBadge = document.querySelector('.preview-live');
+    if (liveBadge) {
+      liveBadge.style.background   = dark ? 'rgba(78,158,118,0.15)' : 'rgba(78,158,118,0.12)';
+      liveBadge.style.borderColor  = dark ? 'rgba(78,158,118,0.3)'  : 'rgba(78,158,118,0.25)';
+    }
+
+    // Preview title
+    const ptitle = document.querySelector('.preview-title');
+    if (ptitle) ptitle.style.color = dark ? '#e6edf3' : 'var(--ink)';
+  }
+
+  function switchTab(el, id) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    ['manual','url','upload'].forEach(p => {
+      document.getElementById('panel-' + p).style.display = p === id ? '' : 'none';
+    });
+  }
+
+  // ── Resizable panels ──────────────────────────────────────────────────
+  (function() {
+    const resizer   = document.getElementById('resizer');
+    const leftWrap  = document.getElementById('leftWrap');
+    const mainEl    = document.getElementById('mainLayout');
+    let dragging = false, startX = 0, startW = 0;
+
+    resizer.addEventListener('mousedown', e => {
+      dragging = true;
+      startX = e.clientX;
+      startW = leftWrap.offsetWidth;
+      resizer.classList.add('dragging');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mousemove', e => {
+      if (!dragging) return;
+      const delta = e.clientX - startX;
+      const newW  = Math.max(260, Math.min(startW + delta, mainEl.offsetWidth * 0.65));
+      leftWrap.style.width = newW + 'px';
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!dragging) return;
+      dragging = false;
+      resizer.classList.remove('dragging');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    });
+  })();
+
+  function switchSocialTab(btn, id) {
+    document.querySelectorAll('.social-stab').forEach(b => {
+      b.style.background = 'rgba(255,255,255,0.35)';
+      b.style.color = '#6B7280';
+      b.style.borderColor = 'rgba(255,255,255,0.6)';
+      b.style.fontWeight = '500';
+    });
+    btn.style.background = 'rgba(45,110,245,0.12)';
+    btn.style.color = '#2D6EF5';
+    btn.style.borderColor = 'rgba(45,110,245,0.3)';
+    btn.style.fontWeight = '600';
+    ['instagram','linkedin','facebook'].forEach(s => {
+      const el = document.getElementById('social-' + s);
+      if(el) el.style.display = s === id ? '' : 'none';
+    });
+  }
+
+  function switchPreviewTab(el, id) {
+    document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.preview-canvas').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById('preview-' + id);
+    if (target) target.classList.add('active');
+  }
+
+  async function simulateScan() {
+    const urlInput = document.getElementById('urlInput');
+    const url = urlInput.value.trim();
+    const label = document.getElementById('scanLabel');
+    if (!url) { urlInput.focus(); return; }
+    label.textContent = 'Scanning…';
+
+    try {
+      // Use allorigins CORS proxy to fetch the page HTML
+      // Try multiple CORS proxies
+      let html = '';
+      const proxies = [
+        `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+      ];
+      for (const proxyUrl of proxies) {
+        try {
+          const res = await fetch(proxyUrl, {signal: AbortSignal.timeout(8000)});
+          if (res.ok) {
+            const ct = res.headers.get('content-type') || '';
+            if (ct.includes('json')) {
+              const data = await res.json();
+              html = data.contents || data || '';
+            } else {
+              html = await res.text();
+            }
+            if (html && html.length > 100) break;
+          }
+        } catch(e) { continue; }
+      }
+      if (!html) throw new Error('Could not fetch URL');
+
+      // Extract colors from inline styles, CSS variables, meta theme-color
+      const colorMatches = new Set();
+
+      // meta theme-color
+      const metaMatch = html.match(/name=["']theme-color["'][^>]*content=["']([^"']+)/i)
+                     || html.match(/content=["']([^"']+)["'][^>]*name=["']theme-color/i);
+      if (metaMatch) colorMatches.add(metaMatch[1].trim());
+
+      // hex colors in style attributes and CSS
+      const hexes = html.matchAll(/#([0-9a-fA-F]{6})/g);
+      const hexCounts = {};
+      for (const m of hexes) {
+        const hex = '#' + m[1].toUpperCase();
+        // Skip near-white, near-black, pure grays
+        const r = parseInt(m[1].slice(0,2),16);
+        const g = parseInt(m[1].slice(2,4),16);
+        const b = parseInt(m[1].slice(4,6),16);
+        const isGray = Math.abs(r-g)<15 && Math.abs(g-b)<15 && Math.abs(r-b)<15;
+        const isWhite = r>240 && g>240 && b>240;
+        const isBlack = r<20 && g<20 && b<20;
+        if (!isGray && !isWhite && !isBlack) {
+          hexCounts[hex] = (hexCounts[hex] || 0) + 1;
+        }
+      }
+
+      // Sort by frequency, take top 3
+      const topColors = Object.entries(hexCounts)
+        .sort((a,b) => b[1]-a[1])
+        .slice(0,3)
+        .map(e => e[0]);
+
+      topColors.forEach(c => colorMatches.add(c));
+
+      // Extract font families
+      const fontMatches = [...html.matchAll(/font-family:\s*['"]?([A-Za-z][^'",;{}()]+)/g)]
+        .map(m => m[1].trim().replace(/['"]/g,'').split(',')[0].trim())
+        .filter(f => f && f.length > 1 && !['serif','sans-serif','monospace','inherit','initial'].includes(f.toLowerCase()));
+      const uniqueFonts = [...new Set(fontMatches)].slice(0,2);
+
+      // Extract brand name from <title>
+      const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+      const brandName = titleMatch ? titleMatch[1].replace(/[-|–—·].*$/,'').trim().slice(0,30) : '';
+
+      // Build result colors array
+      const foundColors = [...colorMatches].slice(0,3);
+      while (foundColors.length < 3) foundColors.push(['#374151','#6B7280','#F0F2F8'][foundColors.length]);
+
+      // Store IMMEDIATELY after building colors — before any UI work
+      window._scanResults = { colors: foundColors.slice(0,3), fonts: uniqueFonts, brandName };
+      console.log('[Systemly] Scan stored:', JSON.stringify(window._scanResults));
+
+      // Update the scan result UI
+      const swatchRow = document.getElementById('scan-color-swatches');
+      if (swatchRow) {
+        swatchRow.innerHTML = foundColors.map(c =>
+          `<div style="width:14px;height:14px;border-radius:3px;background:${c};box-shadow:0 1px 3px rgba(0,0,0,0.2);cursor:pointer;" onclick="applyScanColor('${c}')"></div>`
+        ).join('');
+      }
+
+      const fontsEl = document.getElementById('scan-fonts');
+      if (fontsEl) fontsEl.textContent = uniqueFonts.length ? uniqueFonts.join(', ') : 'Not detected';
+
+      const nameEl = document.getElementById('scan-brand-name');
+      if (nameEl) nameEl.textContent = brandName || 'From <title> tag';
+
+      if (brandName) {
+        const bn = document.getElementById('brandName');
+        if (bn && !bn.value) { bn.value = brandName; updatePreview(); }
+      }
+
+      // (results already stored above)
+
+      label.textContent = 'Scan again';
+      document.getElementById('scanResult').style.display = 'block';
+
+    } catch(e) {
+      console.warn('[Systemly] Fetch error:', e.message);
+      label.textContent = 'Scan website';
+      document.getElementById('scanResult').style.display = 'block';
+      const nameEl = document.getElementById('scan-brand-name');
+      if (nameEl) nameEl.textContent = 'Could not reach URL';
+      // Even on failure, store whatever colors were extracted before the error
+      if (!window._scanResults) {
+        window._scanResults = { colors: ['#374151','#6B7280','#F0F2F8'], fonts: [], brandName: '' };
+      }
+    }
+  }
+
+  function applyScanColor(hex) {
+    // Same pattern used by applyScanResults — keeping for swatch clicks
+    state.accent = hex;
+    const sw1 = document.getElementById('sw1');
+    if(sw1){ sw1.style.background = hex; sw1.querySelector('input').value = hex; }
+    applyAccent();
+  }
+
+  function applyScanResults() {
+    // Read colors directly from the visible swatches as ground truth
+    const swatchDivs = document.querySelectorAll('#scan-color-swatches div');
+    const swatchColors = Array.from(swatchDivs).map(d => d.style.background || d.style.backgroundColor).filter(Boolean);
+
+    // Also check stored results
+    const r = window._scanResults || {};
+    const colors = swatchColors.length >= 2 ? swatchColors : (r.colors || []);
+
+    console.log('[Systemly] Applying colors:', colors);
+    if (!colors.length) { console.warn('[Systemly] No colors to apply'); return; }
+
+    // Convert rgb() to hex if needed
+    function toHex(color) {
+      if (color.startsWith('#')) return color;
+      const m = color.match(/\d+/g);
+      if (!m) return color;
+      return '#' + m.slice(0,3).map(v => parseInt(v).toString(16).padStart(2,'0')).join('');
+    }
+
+    const c0 = toHex(colors[0]);
+    const c1 = toHex(colors[1] || colors[0]);
+    const c2 = toHex(colors[2] || '#F0F2F8');
+
+    // Apply primary
+    state.primary = c0;
+    const sw0 = document.getElementById('sw0');
+    if (sw0) { sw0.style.background = c0; sw0.querySelector('input').value = c0; }
+
+    // Apply accent
+    state.accent = c1;
+    const sw1 = document.getElementById('sw1');
+    if (sw1) { sw1.style.background = c1; sw1.querySelector('input').value = c1; }
+
+    // Apply surface
+    state.surface = c2;
+    const sw2 = document.getElementById('sw2');
+    if (sw2) { sw2.style.background = c2; sw2.querySelector('input').value = c2; }
+
+    // Drive the live preview
+    applyAccent();
+
+    // Fonts
+    if (r.fonts && r.fonts[0]) {
+      loadGoogleFont(r.fonts[0]);
+      const di = document.getElementById('displayFontInput');
+      if (di) di.value = r.fonts[0];
+    }
+    if (r.fonts && (r.fonts[1] || r.fonts[0])) {
+      const f = r.fonts[1] || r.fonts[0];
+      loadGoogleFont(f);
+      const bi = document.getElementById('bodyFontInput');
+      if (bi) bi.value = f;
+    }
+    setTimeout(() => updateFonts(), 400);
+
+    // Brand name
+    if (r.brandName) {
+      const bn = document.getElementById('brandName');
+      if (bn) { bn.value = r.brandName; updatePreview(); }
+    }
+
+    // Button feedback
+    const btn = document.getElementById('apply-scan-btn');
+    if (btn) {
+      btn.textContent = '✓ Applied!';
+      btn.style.background = '#4E9E76';
+      setTimeout(() => {
+        btn.textContent = 'Apply these styles →';
+        btn.style.background = 'var(--plum)';
+      }, 2000);
+    }
+  }
+
+
+  // ── Brand questionnaire — instant personality presets ────────────────────
+  const PERSONALITY_PRESETS = {
+    professional: {
+      primary: '#1E293B', accent: '#2563EB', surface: '#F8FAFC',
+      display: 'Plus Jakarta Sans', body: 'Plus Jakarta Sans',
+      radius: 6, dark: false,
+    },
+    playful: {
+      primary: '#7C3AED', accent: '#F59E0B', surface: '#FDFBFF',
+      display: 'Nunito', body: 'Nunito',
+      radius: 16, dark: false,
+    },
+    bold: {
+      primary: '#111111', accent: '#EF4444', surface: '#F5F5F5',
+      display: 'Syne', body: 'DM Sans',
+      radius: 4, dark: false,
+    },
+    minimal: {
+      primary: '#18181B', accent: '#71717A', surface: '#FAFAFA',
+      display: 'DM Sans', body: 'DM Sans',
+      radius: 2, dark: false,
+    },
+    warm: {
+      primary: '#431407', accent: '#EA580C', surface: '#FFF7ED',
+      display: 'Lora', body: 'Outfit',
+      radius: 10, dark: false,
+    },
+    trustworthy: {
+      primary: '#0C4A6E', accent: '#0284C7', surface: '#F0F9FF',
+      display: 'Libre Baskerville', body: 'Source Sans 3',
+      radius: 6, dark: false,
+    },
+    innovative: {
+      primary: '#0D1117', accent: '#3FB950', surface: '#0D1117',
+      display: 'IBM Plex Mono', body: 'IBM Plex Sans',
+      radius: 6, dark: true,
+    },
+    luxurious: {
+      primary: '#0C0A09', accent: '#D4AF37', surface: '#0C0A09',
+      display: 'Cormorant Garamond', body: 'Raleway',
+      radius: 2, dark: true,
+    },
+  };
+
+  function applyPersonalityPreset(el, key) {
+    document.querySelectorAll('.personality-chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+
+    const p = PERSONALITY_PRESETS[key];
+    if (!p) return;
+
+    // Use updateColor for each swatch — it's the exact same path that works
+    // when a user manually picks a color, so we know it works
+    const makeFakeInput = (val) => ({ value: val });
+
+    updateColor(makeFakeInput(p.primary), 'sw0', 'primary');
+    updateColor(makeFakeInput(p.accent),  'sw1', 'accent');
+    updateColor(makeFakeInput(p.surface), 'sw2', 'surface');
+
+    // Radius
+    const slider = document.getElementById('radiusSlider');
+    if (slider) slider.value = p.radius;
+    updateRadius(p.radius);
+
+    // Dark/light toggle
+    if (p.dark !== previewIsDark) togglePreviewTheme();
+
+    // Fonts — set inputs then load + apply
+    const di = document.getElementById('displayFontInput');
+    const bi = document.getElementById('bodyFontInput');
+    if (di) di.value = p.display;
+    if (bi) bi.value = p.body;
+    loadGoogleFont(p.display);
+    loadGoogleFont(p.body);
+    setTimeout(() => updateFonts(), 350);
+
+    // Brand name
+    const name = document.getElementById('q-brand-name')?.value || '';
+    if (name) {
+      const bn = document.getElementById('brandName');
+      if (bn) { bn.value = name; updatePreview(); }
+    }
+  }
+
+  function updateQPreview() {
+    const name = document.getElementById('q-brand-name')?.value || '';
+    const bn = document.getElementById('brandName');
+    if (bn && name) { bn.value = name; updatePreview(); }
+  }
+
+  // Keep old handleFile/handleDrop as no-ops to avoid reference errors
+  function handleFile() {}
+  function handleDrop(e) { e.preventDefault(); }
+  function processUploadedFile() {}
+  function applyUploadResults() {}
+
+  let swatchCount = 3;
+  const swatchLabels = ['Support','Error','Success','Warning'];
+  function addSwatch() {
+    const row = document.getElementById('swatchRow');
+    const addBtn = row.querySelector('.swatch-wrap:last-child');
+    const id = 'sw' + swatchCount;
+    const label = swatchLabels[swatchCount - 3] || 'Color';
+    const wrap = document.createElement('div');
+    wrap.className = 'swatch-wrap';
+    wrap.innerHTML = `<div class="swatch" id="${id}" style="background:#5B8FF9;"><input type="color" value="#5B8FF9" oninput="updateColor(this,'${id}','extra')" /></div><span class="swatch-label">${label}</span>`;
+    row.insertBefore(wrap, addBtn);
+    swatchCount++;
+  }
+
+  function handleGenerate() {
+    const overlay = document.getElementById('gen-overlay');
+    overlay.style.display = 'flex';
+    const steps = ['Analyzing brand inputs…','Building color token system…','Generating typography scale…','Assembling components…','Preparing export formats…'];
+    const stepEl = document.getElementById('gen-step');
+    const barEl  = document.getElementById('gen-bar');
+    const btn    = document.querySelector('.topbar-cta');
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    let i = 0;
+    stepEl.textContent = steps[0];
+    const iv = setInterval(() => {
+      i++;
+      if (i < steps.length) {
+        stepEl.textContent = steps[i];
+        barEl.style.width = ((i+1)/steps.length * 100) + '%';
+      } else {
+        clearInterval(iv);
+        barEl.style.width = '100%';
+        setTimeout(() => {
+          overlay.style.display = 'none';
+          updateOutputTitle();
+          document.getElementById('output-screen').style.display = 'flex';
+          document.getElementById('app-screen').style.display = 'none';
+          btn.disabled = false;
+          btn.style.opacity = '1';
+        }, 400);
+      }
+    }, 550);
+  }
+
+  function backToInput() {
+    document.getElementById('output-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'flex';
+  }
+
+  function downloadCSS() {
+    const name = (document.getElementById('brandName')?.value || 'brand').toLowerCase().replace(/\s+/g,'-');
+    const a  = state.accent;
+    const p  = state.primary;
+    const s  = state.surface;
+    const r  = state.radius;
+    const df = document.getElementById('displayFontInput')?.value || 'Lora';
+    const bf = document.getElementById('bodyFontInput')?.value || 'DM Sans';
+
+    // Helper: tint a hex by mixing with white
+    const tint = (hex, pct) => {
+      const c = hex.replace('#','');
+      const mix = (ch, i) => Math.round(parseInt(c.slice(i,i+2),16)*(1-pct) + 255*pct).toString(16).padStart(2,'0');
+      return '#' + mix(c,0) + mix(c,2) + mix(c,4);
+    };
+
+    const css = `/* ================================================
+   ${name.toUpperCase()} DESIGN SYSTEM — CSS TOKENS
+   Generated by Systemly · ${new Date().toLocaleDateString()}
+================================================ */
+
+:root {
+
+  /* ── Brand colors ──────────────────────────── */
+  --color-primary:        ${p};
+  --color-primary-900:    ${shadeColor(p,-20)};
+  --color-primary-700:    ${p};
+  --color-primary-500:    ${tint(p,0.2)};
+  --color-primary-300:    ${tint(p,0.5)};
+  --color-primary-100:    ${tint(p,0.85)};
+
+  --color-accent:         ${a};
+  --color-accent-900:     ${shadeColor(a,-20)};
+  --color-accent-700:     ${a};
+  --color-accent-500:     ${tint(a,0.2)};
+  --color-accent-300:     ${tint(a,0.5)};
+  --color-accent-100:     ${tint(a,0.85)};
+
+  --color-surface:        ${s};
+
+  /* ── Semantic colors ───────────────────────── */
+  --color-background:     #FFFFFF;
+  --color-background-subtle: #F9FAFB;
+  --color-background-muted:  ${s};
+  --color-foreground:     ${p};
+  --color-foreground-muted:  #6B7280;
+  --color-border:         #E5E7EB;
+  --color-border-accent:  ${a};
+
+  /* ── State colors ──────────────────────────── */
+  --color-success:        #4E9E76;
+  --color-success-subtle: #ECFDF5;
+  --color-warning:        #D97B2A;
+  --color-warning-subtle: #FFF7ED;
+  --color-destructive:    #EF4444;
+  --color-destructive-subtle: #FEF2F2;
+
+  /* ── Typography ────────────────────────────── */
+  --font-display:  '${df}', serif;
+  --font-body:     '${bf}', sans-serif;
+  --font-mono:     'IBM Plex Mono', monospace;
+
+  --text-xs:    0.68rem;   /* 11px */
+  --text-sm:    0.78rem;   /* 13px */
+  --text-base:  0.9rem;    /* 15px */
+  --text-xl:    1.1rem;    /* 18px */
+  --text-2xl:   1.25rem;   /* 20px */
+  --text-3xl:   1.5rem;    /* 24px */
+  --text-5xl:   2.25rem;   /* 36px */
+
+  --leading-tight:   1.1;
+  --leading-snug:    1.3;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.6;
+
+  --font-weight-regular: 400;
+  --font-weight-medium:  500;
+  --font-weight-bold:    600;
+
+  /* ── Spacing ───────────────────────────────── */
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ── Border radius ─────────────────────────── */
+  --radius-none: 0px;
+  --radius-sm:   ${Math.max(r-4,2)}px;
+  --radius-md:   ${r}px;
+  --radius-lg:   ${r+4}px;
+  --radius-xl:   ${r+8}px;
+  --radius-2xl:  ${r+14}px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ───────────────────────────────── */
+  --shadow-none:   none;
+  --shadow-sm:     0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md:     0 4px 12px rgba(0,0,0,0.10);
+  --shadow-lg:     0 8px 24px rgba(0,0,0,0.12);
+  --shadow-xl:     0 16px 48px rgba(0,0,0,0.16);
+  --shadow-accent: 0 4px 16px ${a}59;
+
+  /* ── Z-index ───────────────────────────────── */
+  --z-base:    0;
+  --z-raised:  10;
+  --z-overlay: 20;
+  --z-modal:   50;
+  --z-toast:   80;
+  --z-tooltip: 100;
+
+  /* ── Breakpoints (use in @media queries) ────── */
+  /* xs:  320px  |  sm: 640px  |  md: 768px  */
+  /* lg: 1024px  |  xl: 1280px | 2xl: 1536px */
+
+}
+
+/* ── Tailwind theme extension ──────────────────
+   Add to tailwind.config.js → theme.extend:
+
+   colors: {
+     primary: 'var(--color-primary)',
+     accent:  'var(--color-accent)',
+     surface: 'var(--color-surface)',
+   },
+   fontFamily: {
+     display: ['${df}', 'serif'],
+     body:    ['${bf}', 'sans-serif'],
+   },
+   borderRadius: {
+     sm:  'var(--radius-sm)',
+     md:  'var(--radius-md)',
+     lg:  'var(--radius-lg)',
+     xl:  'var(--radius-xl)',
+   },
+──────────────────────────────────────────────── */
+`;
+
+    const blob = new Blob([css], { type: 'text/css' });
+    const url  = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href     = url;
+    link.download = name + '-tokens.css';
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function buildTokenJSON() {
+    const name = (document.getElementById('brandName')?.value || 'Brand').replace(/\s+/g,'-');
+    const a  = state.accent;
+    const p  = state.primary;
+    const s  = state.surface;
+    const r  = state.radius;
+    const df = document.getElementById('displayFontInput')?.value || 'Lora';
+    const bf = document.getElementById('bodyFontInput')?.value || 'DM Sans';
+
+    // Helper: mix hex with white for tints
+    const tint = (hex, pct) => {
+      const c = hex.replace('#','');
+      const m = (i) => Math.round(parseInt(c.slice(i,i+2),16)*(1-pct)+255*pct).toString(16).padStart(2,'0');
+      return '#'+m(0)+m(2)+m(4);
+    };
+
+    // W3C Design Token Community Group format
+    // https://design-tokens.github.io/community-group/format/
+    const tokens = {
+      "$metadata": {
+        "tokenSetOrder": ["color","color/semantic","typography","spacing","radius","shadow","zIndex"],
+        "brandName": name,
+        "generatedBy": "Systemly",
+        "generatedAt": new Date().toISOString()
+      },
+
+      "color": {
+        "$type": "color",
+        "primary": {
+          "100": { "$value": tint(p,0.85), "$type": "color" },
+          "300": { "$value": tint(p,0.5),  "$type": "color" },
+          "500": { "$value": tint(p,0.2),  "$type": "color" },
+          "700": { "$value": p,            "$type": "color" },
+          "900": { "$value": shadeColor(p,-20), "$type": "color" }
+        },
+        "accent": {
+          "100": { "$value": tint(a,0.85), "$type": "color" },
+          "300": { "$value": tint(a,0.5),  "$type": "color" },
+          "500": { "$value": tint(a,0.2),  "$type": "color" },
+          "700": { "$value": a,            "$type": "color" },
+          "900": { "$value": shadeColor(a,-20), "$type": "color" }
+        },
+        "surface":  { "$value": s, "$type": "color" },
+        "success":  { "$value": "#4E9E76", "$type": "color" },
+        "warning":  { "$value": "#D97B2A", "$type": "color" },
+        "error":    { "$value": "#EF4444", "$type": "color" },
+        "white":    { "$value": "#FFFFFF", "$type": "color" },
+        "black":    { "$value": "#000000", "$type": "color" }
+      },
+
+      "color/semantic": {
+        "background":         { "$value": "{color.white}",        "$type": "color" },
+        "background-subtle":  { "$value": "#F9FAFB",              "$type": "color" },
+        "background-muted":   { "$value": "{color.surface}",      "$type": "color" },
+        "foreground":         { "$value": "{color.primary.700}",  "$type": "color" },
+        "foreground-muted":   { "$value": "#6B7280",              "$type": "color" },
+        "accent":             { "$value": "{color.accent.700}",   "$type": "color" },
+        "border":             { "$value": "#E5E7EB",              "$type": "color" },
+        "border-accent":      { "$value": "{color.accent.700}",   "$type": "color" }
+      },
+
+      "typography": {
+        "fontFamily": {
+          "display": { "$value": df, "$type": "fontFamily" },
+          "body":    { "$value": bf, "$type": "fontFamily" },
+          "mono":    { "$value": "IBM Plex Mono", "$type": "fontFamily" }
+        },
+        "fontSize": {
+          "xs":   { "$value": "11px", "$type": "dimension" },
+          "sm":   { "$value": "13px", "$type": "dimension" },
+          "base": { "$value": "15px", "$type": "dimension" },
+          "xl":   { "$value": "18px", "$type": "dimension" },
+          "2xl":  { "$value": "20px", "$type": "dimension" },
+          "3xl":  { "$value": "24px", "$type": "dimension" },
+          "5xl":  { "$value": "36px", "$type": "dimension" }
+        },
+        "lineHeight": {
+          "tight":   { "$value": 1.1, "$type": "number" },
+          "snug":    { "$value": 1.3, "$type": "number" },
+          "normal":  { "$value": 1.5, "$type": "number" },
+          "relaxed": { "$value": 1.6, "$type": "number" }
+        },
+        "fontWeight": {
+          "regular": { "$value": 400, "$type": "number" },
+          "medium":  { "$value": 500, "$type": "number" },
+          "bold":    { "$value": 600, "$type": "number" }
+        }
+      },
+
+      "spacing": {
+        "1":  { "$value": "4px",  "$type": "dimension" },
+        "2":  { "$value": "8px",  "$type": "dimension" },
+        "3":  { "$value": "12px", "$type": "dimension" },
+        "4":  { "$value": "16px", "$type": "dimension" },
+        "5":  { "$value": "20px", "$type": "dimension" },
+        "6":  { "$value": "24px", "$type": "dimension" },
+        "8":  { "$value": "32px", "$type": "dimension" },
+        "10": { "$value": "40px", "$type": "dimension" },
+        "12": { "$value": "48px", "$type": "dimension" },
+        "16": { "$value": "64px", "$type": "dimension" }
+      },
+
+      "radius": {
+        "none": { "$value": "0px",                      "$type": "dimension" },
+        "sm":   { "$value": Math.max(r-4,2)+"px",       "$type": "dimension" },
+        "md":   { "$value": r+"px",                     "$type": "dimension" },
+        "lg":   { "$value": (r+4)+"px",                 "$type": "dimension" },
+        "xl":   { "$value": (r+8)+"px",                 "$type": "dimension" },
+        "2xl":  { "$value": (r+14)+"px",                "$type": "dimension" },
+        "full": { "$value": "9999px",                   "$type": "dimension" }
+      },
+
+      "shadow": {
+        "none": { "$value": "none",                                     "$type": "shadow" },
+        "sm":   { "$value": "0 1px 3px rgba(0,0,0,0.08)",              "$type": "shadow" },
+        "md":   { "$value": "0 4px 12px rgba(0,0,0,0.10)",             "$type": "shadow" },
+        "lg":   { "$value": "0 8px 24px rgba(0,0,0,0.12)",             "$type": "shadow" },
+        "xl":   { "$value": "0 16px 48px rgba(0,0,0,0.16)",            "$type": "shadow" },
+        "accent": { "$value": "0 4px 16px "+a+"59",                    "$type": "shadow" }
+      },
+
+      "zIndex": {
+        "base":    { "$value": 0,   "$type": "number" },
+        "raised":  { "$value": 10,  "$type": "number" },
+        "overlay": { "$value": 20,  "$type": "number" },
+        "modal":   { "$value": 50,  "$type": "number" },
+        "toast":   { "$value": 80,  "$type": "number" },
+        "tooltip": { "$value": 100, "$type": "number" }
+      }
+    };
+
+    return { name, tokens };
+  }
+
+  function downloadFigmaTokens() {
+    const { name, tokens } = buildTokenJSON();
+    const json = JSON.stringify(tokens, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href     = url;
+    link.download = name.toLowerCase() + '-tokens.json';
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadAll() {
+    downloadCSS();
+    setTimeout(() => downloadFigmaTokens(), 400);
+  }
+
+  function downloadPDF() {
+    // Show only the left style guide panel and print
+    const dlBtn = document.getElementById('rv-download-btn');
+    if (dlBtn) { dlBtn.textContent = 'Preparing PDF…'; dlBtn.style.opacity = '0.7'; }
+    setTimeout(() => {
+      window.print();
+      if (dlBtn) { dlBtn.innerHTML = 'Download CSS tokens <span style="background:rgba(255,255,255,0.15);border-radius:50%;width:20px;height:20px;display:grid;place-items:center;font-size:0.75rem;">↓</span>'; dlBtn.style.opacity = '1'; }
+    }, 200);
+  }
+
+  // Animate overlay dots
+  (function() {
+    const d = document.getElementById('gen-dots');
+    if (!d) return;
+    const frames = ['', '.', '..', '…'];
+    let i = 0;
+    setInterval(() => { i = (i+1)%frames.length; if(d) d.textContent = frames[i]; }, 400);
+  })();
+
+  // Update output title with brand name
+  function updateOutputTitle() {
+    const name = document.getElementById('brandName')?.value || '';
+    // Main title
+    const t = document.getElementById('output-title');
+    if (t) t.textContent = name ? `${name} design system is ready.` : 'Your design system is ready.';
+    // Hero nameplate
+    const rbn = document.getElementById('review-brand-name');
+    if (rbn) rbn.textContent = name || 'Your Brand';
+    const rbn2 = document.getElementById('rv-token-count');
+    if (rbn2) rbn2.textContent = '128';
+
+    // Fonts
+    const df = document.getElementById('displayFontInput')?.value || 'Lora';
+    const bf = document.getElementById('bodyFontInput')?.value || 'DM Sans';
+    const rds = document.getElementById('review-display-sample');
+    if (rds) { rds.style.fontFamily = "'" + df + "', serif"; }
+    const rdn = document.getElementById('review-display-name');
+    if (rdn) rdn.textContent = df;
+    const rbs = document.getElementById('review-body-sample');
+    if (rbs) { rbs.style.fontFamily = "'" + bf + "', sans-serif"; }
+    const rbn3 = document.getElementById('review-body-name');
+    if (rbn3) rbn3.textContent = bf;
+    ['rs-h1','rs-h2','rs-h3'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.fontFamily = "'" + df + "', serif";
+    });
+    ['rs-body','rs-caption'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.fontFamily = "'" + bf + "', sans-serif";
+    });
+    const rfn = document.getElementById('rv-font-count');
+    if (rfn) rfn.textContent = df === bf ? '1' : '2';
+
+    // Colors — hero bar + palette swatches
+    const a = state.accent;
+    const p = state.primary;
+    const s = state.surface;
+
+    const bar = document.getElementById('review-hero-bar');
+    if (bar) bar.style.background = a;
+
+    // Color dots in nameplate
+    const dots = document.getElementById('review-color-dots');
+    if (dots) {
+      dots.innerHTML = [p, a, s, '#4E9E76', '#D97B2A', '#EF4444'].map(c =>
+        '<div style="width:22px;height:22px;border-radius:50%;background:' + c + ';border:2px solid rgba(255,255,255,0.8);box-shadow:0 1px 4px rgba(0,0,0,0.1);"></div>'
+      ).join('');
+    }
+
+    // Palette swatches
+    const palette = document.getElementById('review-palette');
+    if (palette) {
+      const swatches = [
+        { hex: p, name: 'Primary' },
+        { hex: a, name: 'Accent' },
+        { hex: s, name: 'Surface' },
+        { hex: '#4E9E76', name: 'Success' },
+        { hex: '#D97B2A', name: 'Warning' },
+        { hex: '#EF4444', name: 'Error' },
+      ];
+      palette.innerHTML = swatches.map(sw =>
+        '<div style="display:flex;flex-direction:column;gap:6px;">' +
+          '<div style="width:48px;height:48px;border-radius:10px;background:' + sw.hex + ';border:1px solid rgba(255,255,255,0.6);box-shadow:0 2px 8px rgba(0,0,0,0.08);"></div>' +
+          '<div style="font-size:0.62rem;font-weight:600;color:#374151;">' + sw.name + '</div>' +
+          '<div style="font-size:0.6rem;color:#9CA3AF;">' + sw.hex.toUpperCase() + '</div>' +
+        '</div>'
+      ).join('');
+    }
+
+    // Tint swatches for primary + accent
+    const tints = document.getElementById('review-tints');
+    if (tints) {
+      const makeTints = (hex, label) => {
+        return [0.9,0.7,0.5,0.3].map((op, i) =>
+          '<div style="border-radius:6px;overflow:hidden;">' +
+            '<div style="height:20px;background:' + hex + ';opacity:' + op + ';"></div>' +
+            '<div style="font-size:0.58rem;color:#9CA3AF;padding:2px 0;">' + label + '-' + (i===0?'900':i===1?'600':i===2?'400':'200') + '</div>' +
+          '</div>'
+        ).join('');
+      };
+      tints.innerHTML = makeTints(p, 'primary') + makeTints(a, 'accent');
+    }
+
+    // Components — apply brand colors
+    const r = state.radius;
+    const aText = contrastColor(a);
+    const aSafe2 = (function(hex) {
+      const c = hex.replace('#','');
+      const rv = parseInt(c.slice(0,2),16)/255, gv = parseInt(c.slice(2,4),16)/255, bv = parseInt(c.slice(4,6),16)/255;
+      const toL = v => v <= 0.04045 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4);
+      const L = 0.2126*toL(rv)+0.7152*toL(gv)+0.0722*toL(bv);
+      return 1.05/(L+0.05) < 2.5 ? shadeColor(hex,-40) : hex;
+    })(a);
+
+    const rvp = document.getElementById('rv-btn-primary');
+    if (rvp) { rvp.style.background=a; rvp.style.color=aText; rvp.style.borderRadius=r+'px'; }
+    const rvs = document.getElementById('rv-btn-secondary');
+    if (rvs) { rvs.style.color=aSafe2; rvs.style.borderColor=aSafe2+'60'; rvs.style.borderRadius=r+'px'; }
+    const rvg = document.getElementById('rv-btn-ghost');
+    if (rvg) { rvg.style.borderRadius=r+'px'; }
+    const rvbs = document.getElementById('rv-badge-solid');
+    if (rvbs) { rvbs.style.background=a; rvbs.style.color=aText; }
+    const rvbso = document.getElementById('rv-badge-soft');
+    if (rvbso) { rvbso.style.background=a+'18'; rvbso.style.color=aSafe2; }
+    const rviw = document.getElementById('rv-input-wrap');
+    if (rviw) { rviw.style.borderColor=a+'80'; rviw.style.boxShadow='0 0 0 3px '+a+'15'; rviw.style.borderRadius=r+'px'; }
+
+    // Spacing bars — use accent color
+    ['sp-xs','sp-sm','sp-md','sp-lg','sp-xl','sp-2xl'].forEach((id, i) => {
+      const heights = [4,8,16,24,40,64];
+      const el = document.getElementById(id);
+      if (el) { el.style.height=heights[i]+'px'; el.style.background=a; }
+    });
+
+    // Download button
+    const dlBtn = document.getElementById('rv-download-btn');
+    if (dlBtn) dlBtn.style.background = p;
+
+    // Export icon first card
+    const ei = document.getElementById('rv-export-icon-0');
+    if (ei) ei.style.background = a;
+
+    // Semantic tokens — wire to brand colors
+    setEl('sem-bg-muted', 'background', s);
+    setEl('sem-bg-muted-tok', 'text', '--color-bg-muted · ' + s);
+    setEl('sem-fg-default', 'background', p);
+    setEl('sem-fg-default-tok', 'text', '--color-fg · ' + p);
+    setEl('sem-accent-tok-dot', 'background', a);
+    setEl('sem-accent-tok-label', 'text', '--color-accent · ' + a);
+    setEl('sem-border-accent', 'borderColor', a);
+    setEl('sem-border-accent', 'border', '2px solid ' + a);
+    setEl('sem-border-accent-tok', 'text', '--color-border-accent · ' + a);
+
+    // Type scale — display font for headings, body for rest
+    ['ts-5xl','ts-3xl','ts-2xl','ts-xl'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.fontFamily = "'" + df + "', serif";
+    });
+    ['ts-base','ts-sm','ts-xs'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.fontFamily = "'" + bf + "', sans-serif";
+    });
+
+    // Shadow accent
+    const sAcc = document.getElementById('rv-shadow-accent');
+    if (sAcc) sAcc.style.boxShadow = '0 4px 16px ' + a + '59';
+    setEl('rv-shadow-accent-tok', 'text', '--shadow-accent · 0 4px 16px ' + a + '/35%');
+
+    // Form components — accent color
+    setEl('rv-check-on', 'background', a);
+    setEl('rv-check-on', 'borderColor', a);
+    setEl('rv-check-ind', 'background', a);
+    setEl('rv-radio-on', 'borderColor', a);
+    const radioInner = document.querySelector('#rv-radio-on div');
+    if (radioInner) radioInner.style.background = a;
+    setEl('rv-toggle-on', 'background', a);
+    setEl('rv-select', 'borderColor', a + '60');
+
+    // Feedback — info alert uses accent
+    setEl('rv-alert-info', 'background', a + '0f');
+    setEl('rv-alert-info', 'borderColor', a + '30');
+    setEl('rv-alert-icon', 'background', a);
+    setEl('rv-alert-title', 'color', contrastColor(s) === '#ffffff' ? '#e2e8f0' : '#374151');
+    setEl('rv-toast', 'background', p);
+    setEl('rv-toast-dot', 'background', a);
+
+    // Breakpoint bars + grid — accent color
+    ['rv-bp-xs','rv-bp-sm','rv-bp-md','rv-bp-lg','rv-bp-xl','rv-bp-2xl'].forEach(id => setEl(id, 'background', a));
+    for (let i = 1; i <= 12; i++) setEl('rv-grid-' + i, 'background', a);
+    setEl('rv-grid-span4', 'background', a);
+    setEl('rv-grid-span8', 'background', a);
+
+    // Shadow boxes — use accent tint for colored shadow
+    setEl('rv-shadow-none', 'borderColor', a + '30');
+  }
+
+  // ── Font Picker ───────────────────────────────────────────────────────────
+  var FONT_LIST = [
+    'Lora','DM Sans','Playfair Display','Inter','Fraunces','Syne',
+    'Instrument Serif','IBM Plex Sans','IBM Plex Mono','IBM Plex Serif',
+    'Libre Baskerville','Raleway','Nunito','Work Sans','Montserrat',
+    'Merriweather','Source Serif 4','Crimson Pro','DM Serif Display',
+    'Cormorant Garamond','Josefin Sans','Space Grotesk','Plus Jakarta Sans',
+    'Outfit','Figtree','Manrope','Urbanist','Cabinet Grotesk'
+  ];
+  var fontPickerTarget = 'display';
+
+  function openFontPicker(target) {
+    fontPickerTarget = target;
+    var modal = document.getElementById('font-picker-modal');
+    var title = document.getElementById('font-picker-title');
+    title.textContent = 'Choose ' + (target === 'display' ? 'Display' : 'Body') + ' Font';
+    document.getElementById('font-picker-search').value = '';
+    renderFontList(FONT_LIST);
+    modal.style.display = 'flex';
+    setTimeout(function() { document.getElementById('font-picker-search').focus(); }, 50);
+  }
+
+  function closeFontPicker() {
+    document.getElementById('font-picker-modal').style.display = 'none';
+  }
+
+  function filterFonts(query) {
+    var filtered = FONT_LIST.filter(function(f) { return f.toLowerCase().includes(query.toLowerCase()); });
+    renderFontList(filtered);
+  }
+
+  function renderFontList(fonts) {
+    var list = document.getElementById('font-picker-list');
+    var current = fontPickerTarget === 'display'
+      ? document.getElementById('fc-display-name').textContent
+      : document.getElementById('fc-body-name').textContent;
+    var html = '';
+    for (var i = 0; i < fonts.length; i++) {
+      var f = fonts[i];
+      var isActive = f === current;
+      var bg = isActive ? '#EEF3FF' : 'transparent';
+      var border = isActive ? '#2D6EF5' : 'transparent';
+      html += '<div onclick="selectFont(this.dataset.font)" data-font="' + f + '" style="padding:10px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;background:' + bg + ';border:1.5px solid ' + border + ';">';
+      html += '<span style="font-family: ' + f + ', serif;font-size:0.95rem;color:#111827;">' + f + '</span>';
+      if (isActive) html += '<span style="color:#2D6EF5;font-size:0.75rem;font-weight:700;">✓</span>';
+      html += '</div>';
+    }
+    list.innerHTML = html;
+  }
+
+  function selectFont(fontName) {
+    // Load font from Google Fonts
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=' + fontName.replace(/ /g, '+') + ':wght@400;500;600;700&display=swap';
+    document.head.appendChild(link);
+
+    if (fontPickerTarget === 'display') {
+      document.getElementById('fc-display-name').textContent = fontName;
+      document.getElementById('fc-display-sample').style.fontFamily = "'" + fontName + "', serif";
+      document.getElementById('displayFont').value = fontName;
+    } else {
+      document.getElementById('fc-body-name').textContent = fontName;
+      document.getElementById('fc-body-sample').style.fontFamily = "'" + fontName + "', sans-serif";
+      document.getElementById('bodyFont').value = fontName;
+    }
+    updateFonts();
+    closeFontPicker();
+  }
+
+</script>
+</div><!-- /app-screen -->
+
+<!-- ── Generating overlay ──────────────────────────────────────────── -->
+<div id="gen-overlay" style="display:none;position:fixed;inset:0;z-index:100;background:rgba(230,238,255,0.6);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);flex-direction:column;align-items:center;justify-content:center;gap:28px;">
+  <div style="text-align:center;max-width:360px;">
+    <div style="width:52px;height:52px;background:rgba(45,110,245,0.15);border:1px solid rgba(45,110,245,0.3);border-radius:14px;display:grid;place-items:center;margin:0 auto 20px;">
+      <svg width="22" height="22" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" fill="#2D6EF5" opacity="0.9"/><rect x="8" y="1" width="5" height="5" rx="1" fill="#2D6EF5" opacity="0.5"/><rect x="1" y="8" width="5" height="5" rx="1" fill="#2D6EF5" opacity="0.5"/><rect x="8" y="8" width="5" height="5" rx="1" fill="#2D6EF5" opacity="0.9"/></svg>
+    </div>
+    <h2 style="font-family:'Lora',serif;font-size:1.5rem;font-weight:500;color:#111827;margin-bottom:8px;letter-spacing:-0.02em;">Building your system<span id="gen-dots">…</span></h2>
+    <p id="gen-step" style="font-size:0.82rem;color:#6B7280;margin-bottom:24px;font-family:'DM Sans',sans-serif;">Analyzing brand inputs…</p>
+    <div style="background:rgba(200,210,240,0.4);border-radius:99px;height:4px;overflow:hidden;width:100%;">
+      <div id="gen-bar" style="height:100%;background:#2D6EF5;border-radius:99px;width:0%;transition:width 0.5s ease;box-shadow:0 0 8px rgba(45,110,245,0.5);"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Output screen ───────────────────────────────────────────────── -->
+<div id="output-screen" style="display:none;position:fixed;inset:0;z-index:90;flex-direction:column;">
+  <div class="bg"><div class="bg-blob"></div></div>
+  <div style="position:relative;z-index:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;">
+
+    <!-- Output topbar -->
+    <header class="topbar">
+      <div class="logo">
+        <div class="logo-mark">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" fill="white" opacity="0.9"/><rect x="8" y="1" width="5" height="5" rx="1" fill="white" opacity="0.5"/><rect x="1" y="8" width="5" height="5" rx="1" fill="white" opacity="0.5"/><rect x="8" y="8" width="5" height="5" rx="1" fill="white" opacity="0.9"/></svg>
+        </div>
+        <span class="logo-text">Systemly</span>
+      </div>
+      <div class="topbar-steps">
+        <div class="tstep done"><div class="tstep-num">✓</div><span>Brand inputs</span></div>
+        <div class="tstep-line"></div>
+        <div class="tstep active"><div class="tstep-num">2</div><span>Review & export</span></div>
+      </div>
+      <button onclick="backToInput()" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.6);color:#374151;border:1px solid rgba(255,255,255,0.8);border-radius:8px;padding:8px 16px;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:500;cursor:pointer;backdrop-filter:blur(8px);">← Back to inputs</button>
+    </header>
+
+    <!-- Split layout: style guide left, export right -->
+    <div style="flex:1;min-height:0;display:flex;gap:0;padding:20px;gap:16px;">
+
+      <!-- LEFT: Style guide library -->
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:14px;overflow-y:auto;padding-right:4px;scrollbar-width:thin;scrollbar-color:rgba(200,210,240,0.5) transparent;">
+
+        <!-- Hero nameplate -->
+        <div id="review-hero" style="background:rgba(255,255,255,0.65);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.85);border-radius:18px;padding:22px 24px;position:relative;overflow:hidden;flex-shrink:0;">
+          <div id="review-hero-bar" style="position:absolute;top:0;left:0;right:0;height:3px;background:#2D6EF5;"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;">
+            <div>
+              <div id="review-brand-name" style="font-family:'Lora',serif;font-size:1.6rem;font-weight:500;color:#111827;line-height:1.2;margin-bottom:4px;">Your Brand</div>
+              <div id="review-tagline" style="font-size:0.78rem;color:#6B7280;">Design system · <span id="review-token-count">128 tokens</span> · Generated just now</div>
+            </div>
+            <div style="display:flex;gap:6px;flex-shrink:0;" id="review-color-dots"></div>
+          </div>
+        </div>
+
+        <!-- Colors section -->
+        <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.85);border-radius:18px;padding:20px 22px;flex-shrink:0;">
+          <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9CA3AF;margin-bottom:14px;">Color palette</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;" id="review-palette">
+            <!-- populated by JS -->
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-top:14px;" id="review-tints">
+            <!-- tint swatches populated by JS -->
+          </div>
+        </div>
+
+        <!-- Typography section -->
+        <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.85);border-radius:18px;padding:20px 22px;flex-shrink:0;">
+          <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9CA3AF;margin-bottom:16px;">Typography</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div style="border-right:1px solid rgba(200,210,240,0.3);padding-right:12px;">
+              <div style="font-size:0.65rem;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Display</div>
+              <div id="review-display-sample" style="font-family:'Lora',serif;font-size:2rem;font-weight:500;color:#111827;line-height:1.1;margin-bottom:6px;">Aa</div>
+              <div id="review-display-name" style="font-size:0.72rem;color:#6B7280;">Lora</div>
+              <div style="margin-top:10px;display:flex;flex-direction:column;gap:3px;">
+                <div id="rs-h1" style="font-family:'Lora',serif;font-size:1rem;font-weight:500;color:#111827;">Heading 1</div>
+                <div id="rs-h2" style="font-family:'Lora',serif;font-size:0.82rem;font-weight:500;color:#374151;">Heading 2</div>
+                <div id="rs-h3" style="font-family:'Lora',serif;font-size:0.72rem;font-weight:400;color:#6B7280;">Heading 3</div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:0.65rem;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Body</div>
+              <div id="review-body-sample" style="font-family:'DM Sans',sans-serif;font-size:2rem;font-weight:400;color:#111827;line-height:1.1;margin-bottom:6px;">Aa</div>
+              <div id="review-body-name" style="font-size:0.72rem;color:#6B7280;">DM Sans</div>
+              <div style="margin-top:10px;display:flex;flex-direction:column;gap:3px;">
+                <div id="rs-body" style="font-family:'DM Sans',sans-serif;font-size:0.82rem;color:#374151;line-height:1.5;">Body text sample with normal weight and comfortable reading size.</div>
+                <div id="rs-caption" style="font-family:'DM Sans',sans-serif;font-size:0.68rem;color:#9CA3AF;">Caption · Label · Metadata</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Components section -->
+        <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.85);border-radius:18px;padding:20px 22px;flex-shrink:0;">
+          <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9CA3AF;margin-bottom:16px;">Components</div>
+          <!-- Buttons row -->
+          <div style="margin-bottom:14px;">
+            <div style="font-size:0.65rem;color:#9CA3AF;margin-bottom:8px;font-weight:500;">Buttons</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <button id="rv-btn-primary" style="background:#2D6EF5;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:600;cursor:default;">Primary</button>
+              <button id="rv-btn-secondary" style="background:transparent;color:#2D6EF5;border:1.5px solid rgba(45,110,245,0.4);border-radius:8px;padding:8px 18px;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:500;cursor:default;">Secondary</button>
+              <button id="rv-btn-ghost" style="background:rgba(255,255,255,0.5);color:#374151;border:1px solid rgba(200,210,240,0.6);border-radius:8px;padding:8px 18px;font-family:'DM Sans',sans-serif;font-size:0.8rem;cursor:default;">Ghost</button>
+            </div>
+          </div>
+          <!-- Badges row -->
+          <div style="margin-bottom:14px;">
+            <div style="font-size:0.65rem;color:#9CA3AF;margin-bottom:8px;font-weight:500;">Badges</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+              <span id="rv-badge-solid" style="background:#2D6EF5;color:#fff;font-size:0.68rem;font-weight:600;padding:3px 10px;border-radius:99px;">New</span>
+              <span id="rv-badge-soft"  style="background:rgba(45,110,245,0.12);color:#2D6EF5;font-size:0.68rem;font-weight:600;padding:3px 10px;border-radius:99px;">Active</span>
+              <span style="background:rgba(78,158,118,0.12);color:#4E9E76;font-size:0.68rem;font-weight:600;padding:3px 10px;border-radius:99px;">Success</span>
+              <span style="background:rgba(217,123,42,0.12);color:#D97B2A;font-size:0.68rem;font-weight:600;padding:3px 10px;border-radius:99px;">Warning</span>
+              <span style="background:rgba(239,68,68,0.12);color:#EF4444;font-size:0.68rem;font-weight:600;padding:3px 10px;border-radius:99px;">Error</span>
+            </div>
+          </div>
+          <!-- Input -->
+          <div>
+            <div style="font-size:0.65rem;color:#9CA3AF;margin-bottom:8px;font-weight:500;">Input</div>
+            <div id="rv-input-wrap" style="background:rgba(255,255,255,0.7);border:1.5px solid rgba(45,110,245,0.5);border-radius:8px;padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:0.8rem;color:#9CA3AF;max-width:280px;box-shadow:0 0 0 3px rgba(45,110,245,0.1);">Focused input state…</div>
+          </div>
+        </div>
+
+        <!-- Spacing section -->
+        <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.85);border-radius:18px;padding:20px 22px;flex-shrink:0;">
+          <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9CA3AF;margin-bottom:14px;">Spacing scale</div>
+          <div style="display:flex;align-items:flex-end;gap:8px;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <div id="sp-xs" style="width:4px;background:#2D6EF5;border-radius:1px;"></div>
+              <span style="font-size:0.6rem;color:#9CA3AF;">4</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <div id="sp-sm" style="width:8px;background:#2D6EF5;border-radius:1px;"></div>
+              <span style="font-size:0.6rem;color:#9CA3AF;">8</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <div id="sp-md" style="width:16px;background:#2D6EF5;border-radius:1px;"></div>
+              <span style="font-size:0.6rem;color:#9CA3AF;">16</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <div id="sp-lg" style="width:24px;background:#2D6EF5;border-radius:1px;"></div>
+              <span style="font-size:0.6rem;color:#9CA3AF;">24</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <div id="sp-xl" style="width:40px;background:#2D6EF5;border-radius:1px;"></div>
+              <span style="font-size:0.6rem;color:#9CA3AF;">40</span>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <div id="sp-2xl" style="width:64px;background:#2D6EF5;border-radius:1px;"></div>
+              <span style="font-size:0.6rem;color:#9CA3AF;">64</span>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- Semantic color tokens -->
+        <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.85);border-radius:18px;padding:20px 22px;flex-shrink:0;">
+          <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9CA3AF;margin-bottom:14px;">Semantic color tokens</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <!-- Background tokens -->
+            <div>
+              <div style="font-size:0.62rem;font-weight:600;color:#6B7280;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;">Background</div>
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div id="sem-bg-default" style="width:32px;height:20px;border-radius:4px;background:#FFFFFF;border:1px solid rgba(200,210,240,0.4);flex-shrink:0;"></div>
+                  <div><div style="font-size:0.72rem;font-weight:500;color:#374151;">background</div><div style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;">--color-bg · #FFFFFF</div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div id="sem-bg-subtle" style="width:32px;height:20px;border-radius:4px;background:#F9FAFB;border:1px solid rgba(200,210,240,0.4);flex-shrink:0;"></div>
+                  <div><div style="font-size:0.72rem;font-weight:500;color:#374151;">background-subtle</div><div style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;">--color-bg-subtle · #F9FAFB</div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div id="sem-bg-muted" style="width:32px;height:20px;border-radius:4px;flex-shrink:0;"></div>
+                  <div><div style="font-size:0.72rem;font-weight:500;color:#374151;">background-muted</div><div id="sem-bg-muted-tok" style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;">--color-bg-muted</div></div>
+                </div>
+              </div>
+            </div>
+            <!-- Foreground tokens -->
+            <div>
+              <div style="font-size:0.62rem;font-weight:600;color:#6B7280;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;">Foreground</div>
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div id="sem-fg-default" style="width:32px;height:20px;border-radius:4px;flex-shrink:0;"></div>
+                  <div><div style="font-size:0.72rem;font-weight:500;color:#374151;">foreground</div><div id="sem-fg-default-tok" style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;">--color-fg</div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div id="sem-fg-muted" style="width:32px;height:20px;border-radius:4px;background:#6B7280;flex-shrink:0;"></div>
+                  <div><div style="font-size:0.72rem;font-weight:500;color:#374151;">foreground-muted</div><div style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;">--color-fg-muted · #6B7280</div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div id="sem-accent-tok-dot" style="width:32px;height:20px;border-radius:4px;flex-shrink:0;"></div>
+                  <div><div style="font-size:0.72rem;font-weight:500;color:#374151;">accent</div><div id="sem-accent-tok-label" style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;">--color-accent</div></div>
+                </div>
+              </div>
+            </div>
+            <!-- Border tokens -->
+            <div>
+              <div style="font-size:0.62rem;font-weight:600;color:#6B7280;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;">Border</div>
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div style="width:32px;height:20px;border-radius:4px;border:2px solid #E5E7EB;flex-shrink:0;"></div>
+                  <div><div style="font-size:0.72rem;font-weight:500;color:#374151;">border-default</div><div style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;">--color-border · #E5E7EB</div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div id="sem-border-accent" style="width:32px;height:20px;border-radius:4px;flex-shrink:0;"></div>
+                  <div><div style="font-size:0.72rem;font-weight:500;color:#374151;">border-accent</div><div id="sem-border-accent-tok" style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;">--color-border-accent</div></div>
+                </div>
+              </div>
+            </div>
+            <!-- State tokens -->
+            <div>
+              <div style="font-size:0.62rem;font-weight:600;color:#6B7280;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;">States</div>
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div style="width:32px;height:20px;border-radius:4px;background:#4E9E76;flex-shrink:0;"></div>
+                  <div><div style="font-size:0.72rem;font-weight:500;color:#374151;">success</div><div style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;">--color-success · #4E9E76</div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div style="width:32px;height:20px;border-radius:4px;background:#D97B2A;flex-shrink:0;"></div>
+                  <div><div style="font-size:0.72rem;font-weight:500;color:#374151;">warning</div><div style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;">--color-warning · #D97B2A</div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div style="width:32px;height:20px;border-radius:4px;background:#EF4444;flex-shrink:0;"></div>
+                  <div><div style="font-size:0.72rem;font-weight:500;color:#374151;">destructive</div><div style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;">--color-destructive · #EF4444</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Full type scale -->
+        <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.85);border-radius:18px;padding:20px 22px;flex-shrink:0;">
+          <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9CA3AF;margin-bottom:14px;">Type scale</div>
+          <div style="display:flex;flex-direction:column;gap:0;">
+            <div style="display:grid;grid-template-columns:80px 1fr 60px 60px 60px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(200,210,240,0.25);">
+              <div style="font-size:0.6rem;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Token</div>
+              <div style="font-size:0.6rem;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Sample</div>
+              <div style="font-size:0.6rem;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Size</div>
+              <div style="font-size:0.6rem;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Line-h</div>
+              <div style="font-size:0.6rem;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Weight</div>
+            </div>
+            <div style="display:grid;grid-template-columns:80px 1fr 60px 60px 60px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(200,210,240,0.15);">
+              <div style="font-size:0.6rem;font-family:monospace;color:#6B7280;">--text-5xl</div>
+              <div id="ts-5xl" style="font-size:2.25rem;font-weight:600;color:#111827;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Aa</div>
+              <div style="font-size:0.65rem;color:#9CA3AF;">36px</div><div style="font-size:0.65rem;color:#9CA3AF;">1.1</div><div style="font-size:0.65rem;color:#9CA3AF;">600</div>
+            </div>
+            <div style="display:grid;grid-template-columns:80px 1fr 60px 60px 60px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(200,210,240,0.15);">
+              <div style="font-size:0.6rem;font-family:monospace;color:#6B7280;">--text-3xl</div>
+              <div id="ts-3xl" style="font-size:1.5rem;font-weight:500;color:#111827;line-height:1.2;">Heading 1</div>
+              <div style="font-size:0.65rem;color:#9CA3AF;">24px</div><div style="font-size:0.65rem;color:#9CA3AF;">1.2</div><div style="font-size:0.65rem;color:#9CA3AF;">500</div>
+            </div>
+            <div style="display:grid;grid-template-columns:80px 1fr 60px 60px 60px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(200,210,240,0.15);">
+              <div style="font-size:0.6rem;font-family:monospace;color:#6B7280;">--text-2xl</div>
+              <div id="ts-2xl" style="font-size:1.25rem;font-weight:500;color:#111827;line-height:1.3;">Heading 2</div>
+              <div style="font-size:0.65rem;color:#9CA3AF;">20px</div><div style="font-size:0.65rem;color:#9CA3AF;">1.3</div><div style="font-size:0.65rem;color:#9CA3AF;">500</div>
+            </div>
+            <div style="display:grid;grid-template-columns:80px 1fr 60px 60px 60px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(200,210,240,0.15);">
+              <div style="font-size:0.6rem;font-family:monospace;color:#6B7280;">--text-xl</div>
+              <div id="ts-xl" style="font-size:1.1rem;font-weight:500;color:#111827;line-height:1.4;">Heading 3</div>
+              <div style="font-size:0.65rem;color:#9CA3AF;">18px</div><div style="font-size:0.65rem;color:#9CA3AF;">1.4</div><div style="font-size:0.65rem;color:#9CA3AF;">500</div>
+            </div>
+            <div style="display:grid;grid-template-columns:80px 1fr 60px 60px 60px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(200,210,240,0.15);">
+              <div style="font-size:0.6rem;font-family:monospace;color:#6B7280;">--text-base</div>
+              <div id="ts-base" style="font-size:0.9rem;font-weight:400;color:#374151;line-height:1.6;">Body text — comfortable reading size</div>
+              <div style="font-size:0.65rem;color:#9CA3AF;">15px</div><div style="font-size:0.65rem;color:#9CA3AF;">1.6</div><div style="font-size:0.65rem;color:#9CA3AF;">400</div>
+            </div>
+            <div style="display:grid;grid-template-columns:80px 1fr 60px 60px 60px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(200,210,240,0.15);">
+              <div style="font-size:0.6rem;font-family:monospace;color:#6B7280;">--text-sm</div>
+              <div id="ts-sm" style="font-size:0.78rem;font-weight:400;color:#6B7280;line-height:1.5;">Small text, labels, secondary info</div>
+              <div style="font-size:0.65rem;color:#9CA3AF;">13px</div><div style="font-size:0.65rem;color:#9CA3AF;">1.5</div><div style="font-size:0.65rem;color:#9CA3AF;">400</div>
+            </div>
+            <div style="display:grid;grid-template-columns:80px 1fr 60px 60px 60px;gap:8px;align-items:center;padding:8px 0;">
+              <div style="font-size:0.6rem;font-family:monospace;color:#6B7280;">--text-xs</div>
+              <div id="ts-xs" style="font-size:0.68rem;font-weight:500;color:#9CA3AF;letter-spacing:.05em;text-transform:uppercase;">CAPTION · META</div>
+              <div style="font-size:0.65rem;color:#9CA3AF;">11px</div><div style="font-size:0.65rem;color:#9CA3AF;">1.4</div><div style="font-size:0.65rem;color:#9CA3AF;">500</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shadows & elevation -->
+        <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.85);border-radius:18px;padding:20px 22px;flex-shrink:0;">
+          <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9CA3AF;margin-bottom:14px;">Shadows & elevation</div>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+              <div id="rv-shadow-none" style="width:44px;height:44px;border-radius:8px;background:#fff;border:1px solid rgba(200,210,240,0.5);"></div>
+              <div style="text-align:center;"><div style="font-size:0.65rem;font-weight:500;color:#374151;">none</div><div style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;">--shadow-none</div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+              <div id="rv-shadow-sm" style="width:44px;height:44px;border-radius:8px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.08);"></div>
+              <div style="text-align:center;"><div style="font-size:0.65rem;font-weight:500;color:#374151;">sm</div><div style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;">--shadow-sm</div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+              <div id="rv-shadow-md" style="width:44px;height:44px;border-radius:8px;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
+              <div style="text-align:center;"><div style="font-size:0.65rem;font-weight:500;color:#374151;">md</div><div style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;">--shadow-md</div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+              <div id="rv-shadow-lg" style="width:44px;height:44px;border-radius:8px;background:#fff;box-shadow:0 8px 24px rgba(0,0,0,0.12);"></div>
+              <div style="text-align:center;"><div style="font-size:0.65rem;font-weight:500;color:#374151;">lg</div><div style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;">--shadow-lg</div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+              <div id="rv-shadow-xl" style="width:44px;height:44px;border-radius:8px;background:#fff;box-shadow:0 16px 48px rgba(0,0,0,0.16);"></div>
+              <div style="text-align:center;"><div style="font-size:0.65rem;font-weight:500;color:#374151;">xl</div><div style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;">--shadow-xl</div></div>
+            </div>
+          </div>
+          <!-- Colored shadows note -->
+          <div style="margin-top:14px;padding:10px 12px;background:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.8);border-radius:10px;">
+            <div style="font-size:0.65rem;font-weight:600;color:#374151;margin-bottom:4px;">Accent shadow</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div id="rv-shadow-accent" style="width:44px;height:44px;border-radius:8px;background:#fff;flex-shrink:0;"></div>
+              <div id="rv-shadow-accent-tok" style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;;color:#6B7280;">--shadow-accent · 0 4px 16px accent/35%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form components -->
+        <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.85);border-radius:18px;padding:20px 22px;flex-shrink:0;">
+          <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9CA3AF;margin-bottom:14px;">Form components</div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <!-- Select -->
+            <div>
+              <div style="font-size:0.62rem;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Select</div>
+              <div id="rv-select" style="display:inline-flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.7);border:1.5px solid rgba(200,210,240,0.6);border-radius:8px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:0.8rem;color:#374151;min-width:200px;cursor:default;">
+                <span>Choose an option</span>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;;display:block;margin-top:5px;">--radius-md · --border-default · --bg-input</div>
+            </div>
+            <!-- Checkbox + Radio row -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <div>
+                <div style="font-size:0.62rem;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Checkbox</div>
+                <div style="display:flex;flex-direction:column;gap:7px;">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div id="rv-check-on" style="width:16px;height:16px;border-radius:4px;display:grid;place-items:center;flex-shrink:0;background:#2D6EF5;border:1.5px solid #2D6EF5;">
+                      <svg width="9" height="7" viewBox="0 0 9 7" fill="none"><path d="M1 3.5l2.5 2.5 5-5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <span style="font-size:0.78rem;color:#374151;">Checked</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="width:16px;height:16px;border-radius:4px;background:transparent;border:1.5px solid rgba(200,210,240,0.8);flex-shrink:0;"></div>
+                    <span style="font-size:0.78rem;color:#374151;">Unchecked</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div id="rv-check-ind" style="width:16px;height:16px;border-radius:4px;display:grid;place-items:center;flex-shrink:0;">
+                      <div style="width:8px;height:2px;background:#fff;border-radius:1px;"></div>
+                    </div>
+                    <span style="font-size:0.78rem;color:#374151;">Indeterminate</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:0.62rem;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Radio</div>
+                <div style="display:flex;flex-direction:column;gap:7px;">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div id="rv-radio-on" style="width:16px;height:16px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;border:2px solid #2D6EF5;">
+                      <div style="width:6px;height:6px;border-radius:50%;background:#2D6EF5;"></div>
+                    </div>
+                    <span style="font-size:0.78rem;color:#374151;">Selected</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="width:16px;height:16px;border-radius:50%;background:transparent;border:1.5px solid rgba(200,210,240,0.8);flex-shrink:0;"></div>
+                    <span style="font-size:0.78rem;color:#374151;">Unselected</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Toggle -->
+            <div>
+              <div style="font-size:0.62rem;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Toggle</div>
+              <div style="display:flex;gap:14px;align-items:center;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div id="rv-toggle-on" style="width:36px;height:20px;border-radius:99px;display:flex;align-items:center;padding:2px;background:#2D6EF5;">
+                    <div style="width:16px;height:16px;border-radius:50%;background:#fff;margin-left:auto;box-shadow:0 1px 4px rgba(0,0,0,0.15);"></div>
+                  </div>
+                  <span style="font-size:0.78rem;color:#374151;">On</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div style="width:36px;height:20px;border-radius:99px;display:flex;align-items:center;padding:2px;background:rgba(200,210,240,0.5);">
+                    <div style="width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.1);"></div>
+                  </div>
+                  <span style="font-size:0.78rem;color:#374151;">Off</span>
+                </div>
+              </div>
+              <div style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;;display:block;margin-top:5px;">--radius-full · --color-accent (on state)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feedback components -->
+        <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.85);border-radius:18px;padding:20px 22px;flex-shrink:0;">
+          <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9CA3AF;margin-bottom:14px;">Feedback components</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <!-- Alerts -->
+            <div id="rv-alert-info" style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:10px;border:1px solid rgba(45,110,245,0.2);background:rgba(45,110,245,0.06);">
+              <div id="rv-alert-icon" style="width:16px;height:16px;border-radius:50%;background:#2D6EF5;display:grid;place-items:center;flex-shrink:0;margin-top:1px;">
+                <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><circle cx="4" cy="4" r="3" stroke="white" stroke-width="1.2"/><line x1="4" y1="3" x2="4" y2="5" stroke="white" stroke-width="1.2" stroke-linecap="round"/></svg>
+              </div>
+              <div>
+                <div id="rv-alert-title" style="font-size:0.78rem;font-weight:600;color:#374151;margin-bottom:2px;">Info alert</div>
+                <div style="font-size:0.7rem;color:#6B7280;">Something useful the user should know about.</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:10px;border:1px solid rgba(78,158,118,0.25);background:rgba(78,158,118,0.07);">
+              <div style="width:16px;height:16px;border-radius:50%;background:#4E9E76;display:grid;place-items:center;flex-shrink:0;margin-top:1px;">
+                <svg width="8" height="7" viewBox="0 0 8 7" fill="none"><path d="M1 3.5l2 2 4-4" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div><div style="font-size:0.78rem;font-weight:600;color:#374151;margin-bottom:2px;">Success alert</div><div style="font-size:0.7rem;color:#6B7280;">Your changes have been saved.</div></div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:10px;border:1px solid rgba(239,68,68,0.2);background:rgba(239,68,68,0.06);">
+              <div style="width:16px;height:16px;border-radius:50%;background:#EF4444;display:grid;place-items:center;flex-shrink:0;margin-top:1px;">
+                <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><line x1="2" y1="2" x2="6" y2="6" stroke="white" stroke-width="1.2" stroke-linecap="round"/><line x1="6" y1="2" x2="2" y2="6" stroke="white" stroke-width="1.2" stroke-linecap="round"/></svg>
+              </div>
+              <div><div style="font-size:0.78rem;font-weight:600;color:#374151;margin-bottom:2px;">Error alert</div><div style="font-size:0.7rem;color:#6B7280;">Something went wrong. Please try again.</div></div>
+            </div>
+            <!-- Toast -->
+            <div style="margin-top:4px;">
+              <div style="font-size:0.62rem;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Toast</div>
+              <div id="rv-toast" style="display:inline-flex;align-items:center;gap:10px;background:#111827;border-radius:10px;padding:10px 14px;box-shadow:0 8px 24px rgba(0,0,0,0.2);">
+                <div id="rv-toast-dot" style="width:6px;height:6px;border-radius:50%;background:#4E9E76;flex-shrink:0;"></div>
+                <span style="font-size:0.78rem;font-weight:500;color:#fff;">System generated successfully</span>
+                <span style="font-size:0.7rem;color:#6B7280;cursor:default;">✕</span>
+              </div>
+              <div style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;;display:block;margin-top:5px;">--bg-inverse · --text-inverse · --radius-lg</div>
+            </div>
+            <!-- Tooltip -->
+            <div style="margin-top:4px;">
+              <div style="font-size:0.62rem;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Tooltip</div>
+              <div style="display:flex;align-items:flex-end;gap:6px;">
+                <div id="rv-tooltip-btn" style="background:transparent;border:1.5px solid rgba(200,210,240,0.6);border-radius:8px;padding:6px 12px;font-size:0.78rem;color:#374151;cursor:default;">Hover me</div>
+                <div style="position:relative;display:inline-block;">
+                  <div id="rv-tooltip" style="background:#111827;color:#fff;font-size:0.68rem;padding:5px 10px;border-radius:6px;white-space:nowrap;">Helpful context here</div>
+                  <div style="width:6px;height:6px;background:#111827;transform:rotate(45deg);margin:0 auto;margin-top:-3px;"></div>
+                </div>
+              </div>
+              <div style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;;display:block;margin-top:5px;">--bg-inverse · z-index: 50 · --radius-sm</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Breakpoints & grid -->
+        <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.85);border-radius:18px;padding:20px 22px;flex-shrink:0;">
+          <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9CA3AF;margin-bottom:14px;">Breakpoints & grid</div>
+          <!-- Breakpoint bars -->
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+            <div style="display:grid;grid-template-columns:60px 1fr 60px;gap:8px;align-items:center;">
+              <span style="font-size:0.65rem;font-weight:600;color:#374151;font-family:monospace;">xs</span>
+              <div style="height:6px;border-radius:3px;background:rgba(45,110,245,0.2);overflow:hidden;"><div id="rv-bp-xs" style="height:100%;background:#2D6EF5;width:19%;border-radius:3px;"></div></div>
+              <span style="font-size:0.62rem;color:#9CA3AF;text-align:right;">320px</span>
+            </div>
+            <div style="display:grid;grid-template-columns:60px 1fr 60px;gap:8px;align-items:center;">
+              <span style="font-size:0.65rem;font-weight:600;color:#374151;font-family:monospace;">sm</span>
+              <div style="height:6px;border-radius:3px;background:rgba(45,110,245,0.2);overflow:hidden;"><div id="rv-bp-sm" style="height:100%;background:#2D6EF5;width:37%;border-radius:3px;"></div></div>
+              <span style="font-size:0.62rem;color:#9CA3AF;text-align:right;">640px</span>
+            </div>
+            <div style="display:grid;grid-template-columns:60px 1fr 60px;gap:8px;align-items:center;">
+              <span style="font-size:0.65rem;font-weight:600;color:#374151;font-family:monospace;">md</span>
+              <div style="height:6px;border-radius:3px;background:rgba(45,110,245,0.2);overflow:hidden;"><div id="rv-bp-md" style="height:100%;background:#2D6EF5;width:53%;border-radius:3px;"></div></div>
+              <span style="font-size:0.62rem;color:#9CA3AF;text-align:right;">768px</span>
+            </div>
+            <div style="display:grid;grid-template-columns:60px 1fr 60px;gap:8px;align-items:center;">
+              <span style="font-size:0.65rem;font-weight:600;color:#374151;font-family:monospace;">lg</span>
+              <div style="height:6px;border-radius:3px;background:rgba(45,110,245,0.2);overflow:hidden;"><div id="rv-bp-lg" style="height:100%;background:#2D6EF5;width:69%;border-radius:3px;"></div></div>
+              <span style="font-size:0.62rem;color:#9CA3AF;text-align:right;">1024px</span>
+            </div>
+            <div style="display:grid;grid-template-columns:60px 1fr 60px;gap:8px;align-items:center;">
+              <span style="font-size:0.65rem;font-weight:600;color:#374151;font-family:monospace;">xl</span>
+              <div style="height:6px;border-radius:3px;background:rgba(45,110,245,0.2);overflow:hidden;"><div id="rv-bp-xl" style="height:100%;background:#2D6EF5;width:86%;border-radius:3px;"></div></div>
+              <span style="font-size:0.62rem;color:#9CA3AF;text-align:right;">1280px</span>
+            </div>
+            <div style="display:grid;grid-template-columns:60px 1fr 60px;gap:8px;align-items:center;">
+              <span style="font-size:0.65rem;font-weight:600;color:#374151;font-family:monospace;">2xl</span>
+              <div style="height:6px;border-radius:3px;background:rgba(45,110,245,0.2);overflow:hidden;"><div id="rv-bp-2xl" style="height:100%;background:#2D6EF5;width:100%;border-radius:3px;"></div></div>
+              <span style="font-size:0.62rem;color:#9CA3AF;text-align:right;">1536px</span>
+            </div>
+          </div>
+          <!-- Grid preview -->
+          <div style="font-size:0.62rem;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">12-column grid</div>
+          <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:3px;margin-bottom:6px;">
+            <div id="rv-grid-1" style="height:20px;border-radius:2px;background:#2D6EF5;opacity:0.25;"></div>
+            <div id="rv-grid-2" style="height:20px;border-radius:2px;background:#2D6EF5;opacity:0.25;"></div>
+            <div id="rv-grid-3" style="height:20px;border-radius:2px;background:#2D6EF5;opacity:0.25;"></div>
+            <div id="rv-grid-4" style="height:20px;border-radius:2px;background:#2D6EF5;opacity:0.25;"></div>
+            <div id="rv-grid-5" style="height:20px;border-radius:2px;background:#2D6EF5;opacity:0.25;"></div>
+            <div id="rv-grid-6" style="height:20px;border-radius:2px;background:#2D6EF5;opacity:0.25;"></div>
+            <div id="rv-grid-7" style="height:20px;border-radius:2px;background:#2D6EF5;opacity:0.25;"></div>
+            <div id="rv-grid-8" style="height:20px;border-radius:2px;background:#2D6EF5;opacity:0.25;"></div>
+            <div id="rv-grid-9" style="height:20px;border-radius:2px;background:#2D6EF5;opacity:0.25;"></div>
+            <div id="rv-grid-10" style="height:20px;border-radius:2px;background:#2D6EF5;opacity:0.25;"></div>
+            <div id="rv-grid-11" style="height:20px;border-radius:2px;background:#2D6EF5;opacity:0.25;"></div>
+            <div id="rv-grid-12" style="height:20px;border-radius:2px;background:#2D6EF5;opacity:0.25;"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(12,1fr);gap:3px;">
+            <div id="rv-grid-span4" style="grid-column:span 4;height:14px;border-radius:2px;background:#2D6EF5;opacity:0.6;"></div>
+            <div id="rv-grid-span8" style="grid-column:span 8;height:14px;border-radius:2px;background:#2D6EF5;opacity:0.35;"></div>
+          </div>
+          <div style="display:flex;gap:16px;margin-top:8px;">
+            <div style="font-size:0.6rem;color:#9CA3AF;margin-top:4px;font-family:monospace;">columns: 12 · gutter: 16px · margin: 24px</div>
+          </div>
+        </div>
+
+      </div><!-- /left -->
+
+      <!-- RIGHT: Export panel -->
+      <div style="width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:12px;">
+
+        <!-- Stats -->
+        <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.85);border-radius:18px;padding:18px 20px;">
+          <div id="output-title" style="font-family:'Lora',serif;font-size:1rem;font-weight:500;color:#111827;margin-bottom:12px;line-height:1.3;">Your design system is ready.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div style="background:rgba(45,110,245,0.06);border:1px solid rgba(45,110,245,0.12);border-radius:10px;padding:10px 12px;">
+              <div style="font-size:1.2rem;font-weight:600;color:#111827;" id="rv-token-count">128</div>
+              <div style="font-size:0.65rem;color:#9CA3AF;font-weight:500;text-transform:uppercase;letter-spacing:.05em;">Tokens</div>
+            </div>
+            <div style="background:rgba(78,158,118,0.06);border:1px solid rgba(78,158,118,0.12);border-radius:10px;padding:10px 12px;">
+              <div style="font-size:1.2rem;font-weight:600;color:#111827;">4</div>
+              <div style="font-size:0.65rem;color:#9CA3AF;font-weight:500;text-transform:uppercase;letter-spacing:.05em;">Formats</div>
+            </div>
+            <div style="background:rgba(217,123,42,0.06);border:1px solid rgba(217,123,42,0.12);border-radius:10px;padding:10px 12px;">
+              <div id="rv-font-count" style="font-size:1.2rem;font-weight:600;color:#111827;">2</div>
+              <div style="font-size:0.65rem;color:#9CA3AF;font-weight:500;text-transform:uppercase;letter-spacing:.05em;">Fonts</div>
+            </div>
+            <div style="background:rgba(123,79,140,0.06);border:1px solid rgba(123,79,140,0.12);border-radius:10px;padding:10px 12px;">
+              <div id="rv-component-count" style="font-size:1.2rem;font-weight:600;color:#111827;">12</div>
+              <div style="font-size:0.65rem;color:#9CA3AF;font-weight:500;text-transform:uppercase;letter-spacing:.05em;">Components</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export cards -->
+        <div style="background:rgba(255,255,255,0.65);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.85);border-radius:18px;padding:18px 20px;display:flex;flex-direction:column;gap:8px;flex:1;">
+          <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#9CA3AF;margin-bottom:4px;">Export</div>
+
+          <!-- Figma — token JSON export -->
+          <div onclick="downloadFigmaTokens()" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.85);border-radius:12px;cursor:pointer;transition:all .12s;" onmouseover="this.style.background='rgba(255,255,255,0.9)';this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(255,255,255,0.6)';this.style.transform='translateY(0)'">
+            <div id="rv-export-icon-0" style="width:32px;height:32px;background:#2D6EF5;border-radius:8px;display:grid;place-items:center;flex-shrink:0;color:#fff;">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" fill="white" opacity="0.9"/><rect x="8" y="1" width="5" height="5" rx="1" fill="white" opacity="0.5"/><rect x="1" y="8" width="5" height="5" rx="1" fill="white" opacity="0.5"/><rect x="8" y="8" width="5" height="5" rx="1" fill="white" opacity="0.9"/></svg>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:0.8rem;font-weight:600;color:#111827;">Figma Tokens</div>
+              <div style="font-size:0.68rem;color:#9CA3AF;">Import with Systemly plugin</div>
+            </div>
+            <div style="font-size:0.7rem;font-weight:600;color:#2D6EF5;flex-shrink:0;">↓ .json</div>
+          </div>
+
+          <!-- CSS Tokens — real download -->
+          <div onclick="downloadCSS()" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.85);border-radius:12px;cursor:pointer;transition:all .12s;" onmouseover="this.style.background='rgba(255,255,255,0.9)';this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(255,255,255,0.6)';this.style.transform='translateY(0)'">
+            <div style="width:32px;height:32px;background:#4E9E76;border-radius:8px;display:grid;place-items:center;flex-shrink:0;font-size:0.85rem;color:#fff;">{ }</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:0.8rem;font-weight:600;color:#111827;">CSS Tokens</div>
+              <div style="font-size:0.68rem;color:#9CA3AF;">Custom properties + Tailwind config</div>
+            </div>
+            <div style="font-size:0.7rem;font-weight:600;color:#4E9E76;flex-shrink:0;">↓ .css</div>
+          </div>
+
+          <!-- React — coming soon -->
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.6);border-radius:12px;opacity:0.65;">
+            <div style="width:32px;height:32px;background:#D97B2A;border-radius:8px;display:grid;place-items:center;flex-shrink:0;font-size:0.85rem;color:#fff;">⚛</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:0.8rem;font-weight:600;color:#111827;">React Components</div>
+              <div style="font-size:0.68rem;color:#9CA3AF;">Tailwind + shadcn, pre-themed</div>
+            </div>
+            <div style="font-size:0.65rem;font-weight:600;color:#9CA3AF;background:rgba(200,210,240,0.4);border-radius:4px;padding:2px 7px;flex-shrink:0;">Soon</div>
+          </div>
+
+          <!-- PDF — print to PDF -->
+          <div onclick="downloadPDF()" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.85);border-radius:12px;cursor:pointer;transition:all .12s;" onmouseover="this.style.background='rgba(255,255,255,0.9)';this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(255,255,255,0.6)';this.style.transform='translateY(0)'">
+            <div style="width:32px;height:32px;background:#7C3AED;border-radius:8px;display:grid;place-items:center;flex-shrink:0;font-size:0.85rem;color:#fff;">⊟</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:0.8rem;font-weight:600;color:#111827;">PDF Style Guide</div>
+              <div style="font-size:0.68rem;color:#9CA3AF;">Print or save as PDF</div>
+            </div>
+            <div style="font-size:0.7rem;font-weight:600;color:#7C3AED;flex-shrink:0;">↓ .pdf</div>
+          </div>
+
+          <!-- Download CSS (the one that works) -->
+          <button id="rv-download-btn" onclick="downloadAll()" style="width:100%;margin-top:auto;background:#111827;color:#fff;border:none;border-radius:12px;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:0.84rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(17,24,39,0.2);transition:all .15s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+            Download everything
+            <span style="background:rgba(255,255,255,0.15);border-radius:50%;width:20px;height:20px;display:grid;place-items:center;font-size:0.75rem;">↓</span>
+          </button>
+        </div>
+
+      </div><!-- /right -->
+    </div><!-- /split -->
+  </div>
+</div>
+
+
+<!-- ── Onboarding Tutorial Overlay ─────────────────────────────────────── -->
+<div id="tutorial-overlay" style="display:none;position:fixed;inset:0;z-index:9999;">
+  <!-- Backdrop -->
+  <div id="tutorial-backdrop" style="position:absolute;inset:0;background:rgba(10,10,20,0.7);backdrop-filter:blur(2px);"></div>
+
+  <!-- Tooltip -->
+  <div id="tutorial-tooltip" style="position:absolute;z-index:10000;max-width:300px;background:white;border-radius:16px;padding:24px;box-shadow:0 24px 64px rgba(0,0,0,0.3);font-family:'DM Sans',sans-serif;">
+    <div id="tutorial-step-label" style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#2D6EF5;margin-bottom:8px;">Step 1 of 4</div>
+    <div id="tutorial-title" style="font-size:1rem;font-weight:700;color:#111827;margin-bottom:6px;"></div>
+    <div id="tutorial-body" style="font-size:0.85rem;color:#6B7280;line-height:1.5;margin-bottom:20px;"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="display:flex;gap:4px;" id="tutorial-dots"></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="skipTutorial()" style="padding:7px 14px;border:1px solid #E5E7EB;border-radius:8px;background:none;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:500;color:#9CA3AF;cursor:pointer;">Skip</button>
+        <button onclick="nextTutorialStep()" id="tutorial-next-btn" style="padding:7px 18px;border:none;border-radius:8px;background:#2D6EF5;color:white;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:600;cursor:pointer;">Next →</button>
+      </div>
+    </div>
+    <!-- Arrow pointer -->
+    <div id="tutorial-arrow" style="position:absolute;width:12px;height:12px;background:white;transform:rotate(45deg);"></div>
+  </div>
+</div>
+
+<script>
+  var tutorialSteps = [
+    {
+      title: 'Welcome to Systemly 👋',
+      body: 'In just a few steps you'll have a complete design system. Let's walk through how it works.',
+      target: null,
+      position: 'center'
+    },
+    {
+      title: 'Enter your brand details',
+      body: 'Start by filling in your brand name, picking your colors, and choosing your fonts. Or paste a URL to extract everything automatically.',
+      target: 'leftWrap',
+      position: 'right'
+    },
+    {
+      title: 'Watch the live preview',
+      body: 'Every change updates the preview in real time. Switch between Components, Typography, and Colors to see your full system.',
+      target: 'rightWrap',
+      position: 'left'
+    },
+    {
+      title: 'Generate & export',
+      body: 'Hit "Generate system" to build your full token set, then export as CSS, Figma tokens, or a PDF style guide.',
+      target: 'generate-btn',
+      position: 'bottom'
+    }
+  ];
+
+  var currentStep = 0;
+
+  function initTutorial() {
+    // Only show if coming from landing page or first visit
+    var shown = sessionStorage.getItem('systemly-tutorial-done');
+    if (shown) return;
+    var fromLanding = document.referrer.indexOf('index') > -1 || document.referrer === '' || document.referrer.indexOf('systemly') > -1;
+    showTutorial();
+  }
+
+  function showTutorial() {
+    currentStep = 0;
+    document.getElementById('tutorial-overlay').style.display = 'block';
+    renderTutorialStep();
+  }
+
+  function renderTutorialStep() {
+    var step = tutorialSteps[currentStep];
+    var label = document.getElementById('tutorial-step-label');
+    var title = document.getElementById('tutorial-title');
+    var body = document.getElementById('tutorial-body');
+    var nextBtn = document.getElementById('tutorial-next-btn');
+    var dots = document.getElementById('tutorial-dots');
+
+    label.textContent = 'Step ' + (currentStep + 1) + ' of ' + tutorialSteps.length;
+    title.textContent = step.title;
+    body.textContent = step.body;
+    nextBtn.textContent = currentStep === tutorialSteps.length - 1 ? 'Get started ✓' : 'Next →';
+
+    // Dots
+    dots.innerHTML = tutorialSteps.map(function(s, i) {
+      return '<div style="width:6px;height:6px;border-radius:50%;background:' + (i === currentStep ? '#2D6EF5' : '#E5E7EB') + ';transition:background 0.2s;"></div>';
+    }).join('');
+
+    // Position tooltip
+    var tooltip = document.getElementById('tutorial-tooltip');
+    var arrow = document.getElementById('tutorial-arrow');
+
+    if (step.position === 'center' || !step.target) {
+      tooltip.style.top = '50%';
+      tooltip.style.left = '50%';
+      tooltip.style.transform = 'translate(-50%, -50%)';
+      arrow.style.display = 'none';
+    } else {
+      var el = document.getElementById(step.target);
+      if (!el) { positionCenter(tooltip, arrow); return; }
+      var rect = el.getBoundingClientRect();
+      arrow.style.display = 'block';
+      tooltip.style.transform = 'none';
+
+      if (step.position === 'right') {
+        tooltip.style.left = (rect.right + 16) + 'px';
+        tooltip.style.top = (rect.top + 80) + 'px';
+        arrow.style.left = '-6px';
+        arrow.style.top = '28px';
+        arrow.style.bottom = 'auto';
+      } else if (step.position === 'left') {
+        tooltip.style.left = (rect.left - 316) + 'px';
+        tooltip.style.top = (rect.top + 80) + 'px';
+        arrow.style.right = '-6px';
+        arrow.style.left = 'auto';
+        arrow.style.top = '28px';
+      } else if (step.position === 'bottom') {
+        var btnRect = el.getBoundingClientRect();
+        tooltip.style.left = Math.max(12, btnRect.left - 60) + 'px';
+        tooltip.style.top = (btnRect.bottom + 16) + 'px';
+        arrow.style.top = '-6px';
+        arrow.style.left = '80px';
+        arrow.style.bottom = 'auto';
+      }
+    }
+  }
+
+  function positionCenter(tooltip, arrow) {
+    tooltip.style.top = '50%';
+    tooltip.style.left = '50%';
+    tooltip.style.transform = 'translate(-50%, -50%)';
+    arrow.style.display = 'none';
+  }
+
+  function nextTutorialStep() {
+    if (currentStep < tutorialSteps.length - 1) {
+      currentStep++;
+      renderTutorialStep();
+    } else {
+      skipTutorial();
+    }
+  }
+
+  function skipTutorial() {
+    document.getElementById('tutorial-overlay').style.display = 'none';
+    sessionStorage.setItem('systemly-tutorial-done', '1');
+  }
+
+  // Auto-init after page loads
+  window.addEventListener('load', function() {
+    setTimeout(initTutorial, 600);
+  });
+</script>
+
+</body>
+</html>
